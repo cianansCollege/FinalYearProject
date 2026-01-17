@@ -1,0 +1,44 @@
+making webapp prototype:
+    source /Users/cianan/PythonVenvs/fyp_env/bin/activate
+
+    django-admin startproject prototypeMap
+
+    python manage.py startapp prototypeMap
+
+    add model
+
+    python manage.py makemigrations
+      
+
+    CREATE DATABASE prototype;
+    \c prototype
+    CREATE EXTENSION postgis;
+
+    had issue. needed to update settings:
+        'ENGINE': 'django.db.backends.sqlite3',
+        to
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+    
+
+    now : python manage.py migrate  
+
+    create forms.py
+        from django import forms
+
+        class CoordinateForm(forms.Form):
+            latitude = forms.FloatField()
+            longitude = forms.FloatField()
+
+        add view for this form
+
+        add app/url
+
+        add main/url
+
+        add template
+
+
+    python manage.py runserver
+
+
+

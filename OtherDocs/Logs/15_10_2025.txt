@@ -1,0 +1,14 @@
+This is my first time truly working on my FYP. I am a bit nervous but I think it should be very interesting so I am excited.
+
+I want to start by finding and storing some speech data that I may be able to use.
+
+Potential open source data sets:
+    Mozilla Common Voice
+    VoxForge
+    Tatoeba Audio
+    Librispeech
+    https://huggingface.co/datasets/MLCommons/peoples_speech
+    List:
+        https://github.com/jim-schwoebel/voice_datasets
+    https://www.kaggle.com/datasets/rtatman/speech-accent-archive
+    

@@ -1,0 +1,8 @@
+I downloaded "cv-corpus-5.1-2020-06-22" from Common Voice,
+ and now I am trying to keep only Irish accents as the 50GB is slowing down my device.
+
+I am realising that there is a massively limited amount of data specified to Irish Regions. 
+https://openslr.org/83/
+I found this but once again its just Ireland as a whole
+https://huggingface.co/fbadine/uk_ireland_accent_classification
+potential source

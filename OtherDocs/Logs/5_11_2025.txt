@@ -1,0 +1,32 @@
+Goal today:
+    Set up the pipeline to analyse data. going to practice on my prototype, and have it be expandable.
+
+    Idea: raw -> features -> classifer -> output
+
+    Verifying audio first
+        all good
+
+    get mfcc features
+        got
+
+    basic model.
+        going to just use province for now for simplicity.
+
+https://www.youtube.com/@VideoParliamentIreland/playlists
+
+downloading some videos
+    test: yt-dlp -x --audio-format wav -o "data/audio/%(title)s.%(ext)s" "https://www.youtube.com/watch?v=VIDEO_ID"
+
+    Senator Mary Fitzpatrick:
+        https://youtu.be/i00Fjlq9Yh4?si=_MhHEQS8VjRkK6zq
+
+        yt-dlp -x --audio-format wav -o "data/audio/%(title)s.%(ext)s" "https://youtu.be/i00Fjlq9Yh4?si=_MhHEQS8VjRkK6zq"
+
+        yt-dlp -f bestaudio --extract-audio --audio-format wav -o "%(title)s.%(ext)s" "https://youtu.be/i00Fjlq9Yh4?si=_MhHEQS8VjRkK6zq"
+
+
+POSSIBLE ISSUE:
+    i ama fter realising, that as these are parlimentary sessions, there are sometimes people who interject to ask wuestions. i have tried to skip any i have notcied, but i am sure some will get through. is this a big issue?
+
+    testing link type:
+    yt-dlp -f bestaudio --extract-audio --audio-format wav -o "%(title)s.%(ext)s" "https://www.youtube.com/watch?v=HHyIGNkAyKw&list=PLnz20b9pshcmLyhjocRk-Dnf1igZmS8qz&index=10&pp=iAQB"

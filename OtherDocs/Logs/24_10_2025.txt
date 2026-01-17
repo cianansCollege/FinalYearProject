@@ -1,0 +1,14 @@
+Due to errors last day of bulk downloading data, I will be just making a small prototype with the small data set that I found online of 196
+from the Dáil. 
+
+Downloaded soundfile to begin sound analysis.
+
+Output of Prototype_CheckClips.py:
+    samplerate: 16000 Hz
+    channels: 1
+    duration: 5.878 s
+    format: WAV (Microsoft) [WAV]
+    subtype: Signed 16 bit PCM [PCM_16]
+
+Ran into problem with sklearn- needed to use scikit-learn.
+Ran into problem with librosa, my python is to new.

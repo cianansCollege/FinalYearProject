@@ -1,0 +1,53 @@
+I have been debating changing my project to be to American English as the limitation of data in regards to regional data 
+hindering my project greatly.
+I have found a git-project called : https://github.com/DanielGall500/dail-eireann-audio-dataset which claims to have
+5 clips each from 29 constituents within the dail, seaking about a variety of topics. I will analyse it now.
+It shows promise but each clip is quite small.
+
+https://nationalarchives.ie/collections/dail-eireann-collections/view-de-4/
+Could be interesting. Maybe the Dáil is the way to go. 
+https://www.oireachtas.ie/en/oireachtas-tv/video-archive/dail-videos/
+This is a massive reource. It has a diverse range of accents nad information about the people speaking is easy to come by.
+
+https://www.youtube.com/@VideoParliamentIreland
+
+I am downloading yt-dlp now:
+brew install yt-dlp ffmpeg
+
+How to use:
+    for audio download:
+        yt-dlp -f bestaudio -o "dail_session.mp3" https://www.youtube.com/watch?v=abcdef12345
+
+    for video download:
+        yt-dlp -f bestvideo+bestaudio -o "dail_session.mp4" https://www.youtube.com/watch?v=abcdef12345
+
+Use ffmpeg to get snippets without re-encoding:
+    ffmpeg -ss 00:10:45 -to 00:11:15 -i dail_session.mp3 -acodec copy "dublin_td_clip1.mp3"
+
+Convert to same type:
+    ffmpeg -i input.mp3 -ac 1 -ar 16000 output.wav
+
+Not so much a resource, but very quirky. Roblox Oireachtas?:
+    https://www.youtube.com/@RBXOireachtasTV
+
+Archive.org?
+    https://archive.org/details/Oireachtas
+
+    https://archive.org/details/@rogeryates
+        https://archive.org/details/20130223Rteradio1CountrywideQuinntheexC2016015220160156232
+
+    https://archive.org/details/audio?tab=collection&query=rte&sort=creator
+
+    
+
+
+
+Far Right Irish:
+    Although speaking nonsense, the sheer amount of yapping may make it a vaiable resource.
+
+    https://archive.org/details/youtube-jWquXbVMvYs
+
+    https://altcensored.com/channel/UCOXF9FtCXuWriMxW8qVjPtQ/popular
+    https://www.youtube.com/channel/UCRduT5xxq-_RmQ-L2ZmRMeg
+    https://www.youtube.com/channel/UCMnQHYF2DQ3I0EvrI95P83A
+

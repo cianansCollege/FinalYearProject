@@ -1,0 +1,7 @@
+Looking at other research docs:
+    MPSA-DenseNet: A novel deep learning model for English accent classification by Al-Jumaili Z., Bassiouny T., Alanezi A., Khan W., Al-Jumeily D., Hussain A.J.
+        Speaks about Support Vector Machines(SVMs), Hidden Markov Model Pairwise SVMs and K-Nearest Neighbours(KNN).
+        -Mel-scale Frequency Cepstral Coefficents (MFCC).
+            MFCC may not be best method, Biswas (2023) and Kethireddy et al. (2020) found 10.94% improvement with waveforms.
+        -Theyre conversion of data.
+        -Choice of data 

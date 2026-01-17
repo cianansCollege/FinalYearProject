@@ -1,0 +1,26 @@
+              precision    recall  f1-score   support
+
+   Connaught       1.00      0.60      0.75         5
+    Leinster       0.74      0.91      0.82        22
+     Munster       0.78      0.64      0.70        11
+      Ulster       0.00      0.00      0.00         1
+
+    accuracy                           0.77        39
+   macro avg       0.63      0.54      0.57        39
+weighted avg       0.77      0.77      0.75        39
+
+Per-class rows:
+    Support = how many test items of that class there were (e.g., 22 Leinster clips in test).
+    Recall (“sensitivity”) = out of the true items of this class, what fraction did we correctly catch?
+    recall = TP / (TP + FN)
+    Leinster 0.91 means 91% of true Leinster clips were predicted as Leinster.
+    Precision = of the items we predicted as this class, what fraction were actually correct?
+    precision = TP / (TP + FP)
+    Connaught 1.00 means every time the model predicted Connaught, it was right — but note support is small.
+    F1 = harmonic mean of precision and recall. Balances both.
+    F1 = 2 * (precision * recall) / (precision + recall)
+
+Global rows:
+    accuracy 0.77 = overall % correct across all classes.
+    macro avg = unweighted mean across classes (each class counts equally). Sensitive to small classes (Ulster drags it down).
+    weighted avg = mean weighted by support (big classes like Leinster dominate). Often higher when the dataset is imbalanced.

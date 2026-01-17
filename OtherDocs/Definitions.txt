@@ -1,0 +1,50 @@
+MFCC = Mel-Frequency Cepstral Coefficients
+    Mel-Frequency → the frequency scale is adapted to how humans perceive sound (we hear low frequencies more accurately than high ones).
+    Cepstral → a way of representing the spectrum of a signal (how energy is distributed across frequencies).
+    Coefficients → numbers that summarize important features of the audio signal.
+    In short: MFCCs summarize the important spectral characteristics of a sound in a compact form
+    Why MFCCs are useful:
+        Humans perceive sound non-linearly; MFCCs approximate this perception.
+        They are widely used in speech recognition, speaker identification, and accent analysis.
+        Instead of using raw audio (millions of samples), MFCCs give a small set of numbers per short window of audio that still captures the timbre and characteristics of speech.
+    How MFCCs are computed (conceptually):
+        Split audio into short frames (20–40 ms)
+        Speech changes quickly, so we analyze small slices.
+        Compute the Fourier Transform of each frame
+        This gives the spectrum (frequencies present in that slice).
+        Map frequencies to the Mel scale
+        Low frequencies are more finely resolved; high frequencies are compressed.
+        Take the logarithm of the Mel spectrum
+        Human hearing is roughly logarithmic in loudness.
+        Apply the Discrete Cosine Transform (DCT)
+        Compresses the information into a small number of coefficients (typically 12–13 MFCCs per frame).
+    Output:
+        For a 1-second audio clip at 16 kHz, you might get a matrix of size 13 × N, where:
+        13 → number of MFCCs (rows)
+        N → number of frames/windows (columns)
+        Each column is like a “snapshot” of the spectral characteristics at that moment.
+    How they’re used in ML
+        You can treat each column as a feature vector for that short time window.
+        Common applications:
+        Speech recognition → predict phonemes or words
+        Speaker ID → identify who is speaking
+        Accent / language classification → detect regional accents or languages
+
+itertuples() returns an iterator over the rows of a Pandas DataFrame.
+    eg.
+        import pandas as pd
+        
+        df = pd.DataFrame({
+            "first_name": ["Alice", "Bob"],
+            "last_name": ["Smith", "Jones"],
+            "age": [25, 30]
+        })
+
+        # Using itertuples
+        for row in df.itertuples():
+            print(row)
+
+        output:
+            Pandas(Index=0, first_name='Alice', last_name='Smith', age=25)
+            Pandas(Index=1, first_name='Bob', last_name='Jones', age=30)
+
