@@ -1,0 +1,27 @@
+used build_dataset.py to join the three tables. 
+
+created final_dataset_all.csv (which includes all data) and final_dataset_model.csv (keeps only TDs, must have constituency and province).
+
+ The final modelling dataset was cleaned to remove artefactual columns introduced by spreadsheet software and to ensure a consistent and well-defined schema prior to feature extraction.
+
+ I am currently deciding what way to split my data for training.
+ Currently:
+Speakers per province:
+    Leinster    90
+    Munster     38
+    Connacht    18
+    Ulster      11
+
+current plan:
+    Method: Stratified Group K-Fold
+        k: 5
+        Groups: speaker_key
+        Labels: province
+
+    Report:
+        Mean accuracy
+        Std deviation across folds
+        Confusion matrix (aggregated)
+
+Going to try and balance out data by adding speakers from each constituency in northern ireland first.
+

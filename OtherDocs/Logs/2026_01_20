@@ -1,0 +1,18 @@
+The constituencies are done, and now I am doing a final clean of the file_names to speaker_key to ensure all keys are correct.
+
+thats done
+
+Now its time to join all the tables back together
+Going to write these.
+
+I have 2 concerns:
+    -40 of the 200 speakers dont have a constiuency as they are not TDs, therefore that cant be their Geographic location. 
+        Two solutions, either drop them or use place of birth instead.
+
+    -Data is too scarce to do specifics yet. Have to use provinces instead. 
+
+    -Some TDS were born elsewhere and moved into their constituency.
+
+    We could drop all non tds, forget place of birth and then metadata creation would be much faster. 
+    Or we could just use place of birth.
+    We also dont have northern ireland

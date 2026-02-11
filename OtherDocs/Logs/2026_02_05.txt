@@ -1,0 +1,261 @@
+## Project Log — Northern Ireland & Dáil Speech Dataset Development
+
+**Period covered:** inception of NI dataset → current combined-dataset design decisions
+
+---
+
+## 1. Motivation for the Northern Ireland dataset
+
+The Northern Ireland (NI) dataset was initiated to address a key limitation in the existing Dáil Éireann speech corpus: while the Dáil dataset provided substantial coverage of Irish political speech, it did not fully capture the linguistic and accentual variation associated with **Ulster**, particularly as represented through Northern Ireland speakers.
+
+Given that the broader project aims to map spoken speech features to geographic regions, the absence of NI data risked producing a model that implicitly treated Ulster as underrepresented or homogeneous. The decision was therefore made to explicitly construct a **Northern Ireland political speech dataset** to complement the Dáil data and enable province-level analysis across the island of Ireland.
+
+---
+
+## 2. Initial NI data collection strategy
+
+The NI dataset was designed to prioritise:
+
+* identifiable speakers,
+* clear, sustained speech segments,
+* and reliable metadata (speaker name, party, constituency).
+
+You manually compiled a CSV containing:
+
+* speaker
+* party
+* constituency
+* YouTube URL
+* an initially empty or partially filled `valid_times` column.
+
+Rather than bulk-downloading entire channels indiscriminately, you curated individual videos to ensure:
+
+* the target speaker was present,
+* the speech was not dominated by applause, interruptions, or announcers,
+* and the recording quality was acceptable for acoustic analysis.
+
+This manual curation was time-consuming but intentional, prioritising **dataset quality over scale** at this stage.
+
+---
+
+## 3. YouTube downloading and account safety
+
+To download the NI audio efficiently, you used `yt-dlp` in audio-only mode, running downloads overnight. Because of prior experience with YouTube rate-limiting and account blocks, you took several precautions:
+
+* Used `caffeinate` to prevent system sleep during long downloads.
+* Applied rate limits and randomized sleep intervals.
+* Routed traffic through ProtonVPN.
+* Downloaded audio-only streams and converted them to WAV.
+
+This produced a local archive of NI speech audio files, one per video, which were later standardised to **16 kHz mono WAV** to ensure consistency with the Dáil dataset and downstream ML tooling.
+
+---
+
+## 4. Manual annotation of valid speaking segments
+
+A critical step in the NI pipeline was the manual annotation of speaking segments. You listened to each clip and populated a `valid_times` column using a strict `mm.ss` format (e.g. `1.35` = 1 minute 35 seconds).
+
+Annotations accounted for:
+
+* applause,
+* heckling,
+* other speakers,
+* and procedural interruptions.
+
+Many clips contained **multiple valid speaking windows**, e.g.:
+
+```
+0.28–0.40, 1.02–1.29, 1.35–2.45
+```
+
+An empty `valid_times` cell was defined to mean:
+
+> “the entire clip is valid speech.”
+
+This annotation scheme balanced precision with practicality and allowed later automated processing.
+
+---
+
+## 5. Development of the trimming and segmentation pipeline
+
+You wrote a custom Python script to:
+
+* parse the CSV metadata,
+* extract YouTube video IDs,
+* locate the corresponding downloaded WAV files,
+* and trim them using `ffmpeg`.
+
+Key features of the script included:
+
+* strict parsing of `mm.ss` timestamps,
+* handling of multiple intervals per clip,
+* defensive string cleaning (to avoid silent metadata corruption),
+* and a logging system capturing every output segment and any errors.
+
+Early debugging revealed subtle issues with UTF-8 BOM characters in CSV headers, which caused fields like `constituency` to be read incorrectly and replaced with `"unknown"` in filenames. This was resolved by:
+
+* explicitly opening CSVs using `utf-8-sig`,
+* adding fieldname diagnostics,
+* and hardening the `slug()` function.
+
+This debugging phase significantly improved the robustness of the pipeline.
+
+---
+
+## 6. Segment-length standardisation (≤30 seconds)
+
+Once the trimming pipeline was working correctly, you identified a methodological inconsistency:
+
+* NI clips often produced **long segments** (sometimes several minutes),
+* while the Dáil dataset consisted of **fixed 30-second clips**.
+
+To ensure comparability, you refactored the trimming logic so that:
+
+* any valid speaking interval longer than 30 seconds was subdivided,
+* subdivision introduced **no gaps** between segments,
+* and all final segments were ≤30 seconds in length.
+
+For example:
+
+```
+0.17–0.59 → 0.17–0.47, 0.47–0.59
+```
+
+This change required:
+
+* integrating `ffprobe` to detect full-clip durations,
+* re-running the entire NI trimming process from scratch,
+* deleting legacy outputs to avoid contamination,
+* and regenerating the NI segments index.
+
+The result was a clean, uniform NI dataset with consistent segment length.
+
+---
+
+## 7. Construction of the NI segments index
+
+A structured `ni_segments_index.csv` was generated, containing one row per final audio segment, including:
+
+* segment file path
+* video ID
+* segment index
+* start and end times
+* speaker
+* party
+* constituency
+* clip type
+* original `valid_times` annotation
+
+This index became the authoritative reference for all downstream processing.
+
+---
+
+## 8. Review of the Dáil dataset approach
+
+You then revisited the existing Dáil dataset to assess compatibility. The Dáil dataset had been constructed differently:
+
+* clips were already curated per speaker,
+* the first 30 seconds of each clip were skipped to avoid introductions,
+* a fixed window of `0.30–1.00` was extracted,
+* typically producing one 30-second segment per clip.
+
+While methodologically different, this approach was deemed **compatible**, provided that:
+
+* metadata alignment was handled carefully,
+* and differences in segmentation strategy were acknowledged.
+
+A decision was made **not to reprocess the Dáil audio unnecessarily**, but instead to harmonise at the metadata and modelling stages.
+
+---
+
+## 9. Identification and discussion of methodological risks
+
+Before merging datasets, you explicitly examined several risks:
+
+* **Speaker imbalance**, particularly within the NI dataset.
+* **Domain effects**, such as differences between UK parliamentary speech and Dáil speech.
+* **Procedural language patterns** (e.g. formulaic parliamentary expressions).
+* **Clip-type heterogeneity** (parliament vs conference vs acceptance speeches).
+* **Segment leakage**, where segments from the same speech could appear in both training and test sets.
+* **Geographic label granularity**.
+
+These discussions guided later decisions about splitting, evaluation, and reporting.
+
+---
+
+## 10. Selection of province-level geographic labels
+
+After evaluating several options (constituency, county, binary NI/ROI), you selected **province-level classification** as the most defensible shared geographic label:
+
+* Connacht
+* Leinster
+* Munster
+* Ulster
+
+This choice:
+
+* reduced class sparsity,
+* aligned better with linguistic intuition,
+* and enabled NI and ROI data to coexist naturally.
+
+Initially, province was computed dynamically from constituency, but this was later reconsidered for reproducibility.
+
+---
+
+## 11. Materialising geography and the “native location” decision
+
+You decided to **materialise province as an explicit column**, adding it manually via Excel for transparency and control.
+
+At this stage, a key design tension emerged:
+
+* TDs and NI representatives have constituencies.
+* Senators and some NI speakers do not.
+
+Rather than dropping a large portion of the Dáil dataset, you proposed using **native location (birthplace or childhood location)** for NI speakers (17 individuals).
+
+After discussion, this approach was recognised as:
+
+* linguistically well-founded (accent formation occurs early in life),
+* feasible given the small NI speaker count,
+* and preferable to discarding valuable data.
+
+To preserve clarity, you planned to add a `province_source` column distinguishing:
+
+* `constituency`
+* `birthplace`.
+
+This ensured the dataset remained interpretable and auditable.
+
+---
+
+## 12. Current state of the project
+
+At present:
+
+* The NI dataset is fully segmented, indexed, and standardised.
+* The Dáil dataset consists of uniform 30-second speaker clips.
+* Province is being added explicitly as a column.
+* A clear plan exists to merge both datasets while controlling for leakage and imbalance.
+* The conceptual definition of geography has shifted toward **place of origin**, aligning better with accent theory.
+
+---
+
+## 13. Direction going forward
+
+The immediate next steps are:
+
+* finalise province assignments and verify distributions,
+* align NI and Dáil indices into a single schema,
+* merge into a combined dataset,
+* extract acoustic features (MFCCs),
+* create leakage-safe train/test splits,
+* and train baseline province-level classifiers.
+
+All major preprocessing and design decisions are now explicit, documented, and defensible.
+
+---
+
+If you want, I can next:
+
+* rewrite this into a **formal Methods chapter subsection**, or
+* compress it into a **concise timeline** suitable for an appendix or research log.

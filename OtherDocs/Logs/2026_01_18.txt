@@ -1,0 +1,20 @@
+I was working on it for the last week. 
+mostly I have been creating metadata manually for the Speakers from my data set.
+I have now created a csv with the following tables:
+    dail_speaker_files [filename, speaker_raw, speaker_key]
+
+    SpeakerMaster[speaker_key, native_place, native_city, native_county, constituency, party, non_td_role, extra_information, gender]
+
+    constituency_coordinates[constituencies, coordinates]
+
+I had to write a python program to extract the speaker name from the file names ie. 
+"U1FlGieXtF8_Deputy Aengus √ì Snodaigh - Government Business - 0.wav" to "Deputy Aengus √ì Snodaigh" to "aengus o snodaigh"
+
+Then I got all unique speakers into speaker_master. i cleaned it so if there was any duplication through small spelling differences and such.
+Then I manually got the rest of the information on them.
+Then I cleaned the data ensuring modern constituency names and such.
+I standardised all data, removing fádas temporarliy and ensuring correct spelling and styling.
+
+Now I am creating coordinatesfor the constituencies:
+    using https://www.oireachtas.ie/en/members/constituencies/ to get centroid.
+    

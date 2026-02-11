@@ -1,29 +1,47 @@
 ############################################
-# OS / Editor
+# OS / macOS / Windows
 ############################################
 .DS_Store
+.AppleDouble
+.LSOverride
 ._*
 Thumbs.db
+
+############################################
+# Editors / IDEs
+############################################
 .vscode/
 .idea/
 
 ############################################
-# Python
+# Python Cache & Build
 ############################################
 __pycache__/
 *.py[cod]
-*.log
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
 *.egg-info/
 build/
 dist/
 
 ############################################
-# Virtual environments
+# Logs
+############################################
+*.log
+
+############################################
+# Virtual Environments
 ############################################
 venv/
 env/
 .venv/
+*.venv
+*.env
 fyp_env*/
+fyp_env312/
 pythonvenvs/
 
 ############################################
@@ -38,14 +56,16 @@ pythonvenvs/
 db.sqlite3
 
 ############################################
-# DATA (critical)
+# DATA (CRITICAL – DO NOT TRACK)
 ############################################
 Data/
 Prototype1/data/
 Prototype2/data/
+*.tsv
+*.csv
 
 ############################################
-# Audio (absolute no-go in git)
+# Audio (ABSOLUTE NO-GO IN GIT)
 ############################################
 *.wav
 *.mp3
@@ -54,23 +74,26 @@ Prototype2/data/
 *.ogg
 
 ############################################
-# Features / ML outputs
+# Machine Learning Outputs
 ############################################
 features/
-*.csv
 *.pkl
 *.joblib
 *.pt
 *.h5
 
+# Specific model paths
+FinalPrototype/accentmap/api/rf_model.pkl
+
 ############################################
-# Django media
+# Django / Media
 ############################################
 media/
+audio_storage/
 staticfiles/
 
 ############################################
-# Temporary / exports
+# Temporary / Outputs / Figures
 ############################################
 outputs/
 results/
@@ -78,7 +101,7 @@ plots/
 figures/
 
 ############################################
-# Secrets
+# Secrets / Environment Files
 ############################################
 .env
 .env.*
