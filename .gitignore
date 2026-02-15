@@ -106,3 +106,4 @@ figures/
 .env
 .env.*
 *.pptx
+*.npz
