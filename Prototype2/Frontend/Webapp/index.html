@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accent Province Demo</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    html, body { height: 100%; }
+    .app-wrap { min-height: 100vh; }
+    .panel { height: calc(100vh - 2rem); }
+    #map { height: 100%; min-height: 520px; border-radius: 0.75rem; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .scroll { overflow: auto; }
+    .audio-mini { width: 100%; }
+    .tight { margin-bottom: 0.5rem; }
+  </style>
+</head>
+
+<body class="bg-light">
+  <div class="container-fluid p-3 app-wrap">
+    <div class="row g-3">
+
+      <!-- Left third: Voice input -->
+      <div class="col-12 col-lg-4">
+        <div class="card shadow-sm panel">
+          <div class="card-body d-flex flex-column">
+            <h4 class="mb-3">Record your voice</h4>
+
+            <div class="mb-3">
+              <label class="form-label tight">Prompt</label>
+              <div class="p-3 bg-body-tertiary rounded">
+                <div class="fw-semibold">Say the sentence below clearly:</div>
+                <div class="mt-2 mono" id="promptText">
+                  I went to the shop yesterday and bought a bottle of water.
+                </div>
+              </div>
+              <div class="form-text">
+                Keep it natural. Avoid background noise.
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label tight">Time limit (seconds)</label>
+                <input id="timeLimit" type="number" class="form-control" value="8" min="3" max="30">
+              </div>
+              <div class="col-6">
+                <label class="form-label tight">Native province (optional)</label>
+                <select id="selfProvince" class="form-select">
+                  <option value="">Prefer not to say</option>
+                  <option value="Leinster">Leinster</option>
+                  <option value="Munster">Munster</option>
+                  <option value="Connacht">Connacht</option>
+                  <option value="Ulster">Ulster</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-3">
+              <button id="btnStart" class="btn btn-primary w-100">Start recording</button>
+              <button id="btnStop" class="btn btn-outline-secondary w-100" disabled>Stop</button>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted">Status</div>
+                <span class="badge text-bg-secondary" id="recStatus">Idle</span>
+              </div>
+              <div class="progress mt-2" role="progressbar" aria-label="Recording progress">
+                <div id="recProgress" class="progress-bar" style="width:0%"></div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label tight">Preview (latest take)</label>
+              <audio id="audioPreview" class="audio-mini" controls></audio>
+
+              <div class="d-flex gap-2 mt-2">
+                <button id="btnRetake" class="btn btn-outline-danger w-100" disabled>Retake</button>
+                <button id="btnSubmit" class="btn btn-success w-100" disabled>Submit for prediction</button>
+              </div>
+
+              <div class="form-text">
+                Retake discards the current recording.
+              </div>
+            </div>
+
+            <div class="mt-auto">
+              <div class="alert alert-info mb-0">
+                Prototype UI. Prediction is currently a stub. We will connect an API next.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle third: Predictions -->
+      <div class="col-12 col-lg-4">
+        <div class="card shadow-sm panel">
+          <div class="card-body d-flex flex-column">
+            <h4 class="mb-3">Predictions</h4>
+
+            <div class="card mb-3 border-0 bg-body-tertiary">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <div class="text-muted">Current result</div>
+                    <div class="fs-4 fw-semibold" id="currentProvince">—</div>
+                  </div>
+                  <span class="badge text-bg-dark" id="currentConfidence">—</span>
+                </div>
+
+                <hr>
+
+                <div class="d-flex gap-2">
+                  <button id="btnFeedbackRight" class="btn btn-outline-success w-100" disabled>Seems right</button>
+                  <button id="btnFeedbackWrong" class="btn btn-outline-danger w-100" disabled>Seems wrong</button>
+                </div>
+
+                <div class="form-text mt-2">
+                  If you select a native province, correctness can be computed. Otherwise feedback is stored as subjective.
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="text-muted">Recent submissions</div>
+              <button id="btnClear" class="btn btn-sm btn-outline-secondary">Clear</button>
+            </div>
+
+            <div class="list-group scroll" id="predList" style="flex:1;">
+              <div class="text-muted p-3">No predictions yet.</div>
+            </div>
+
+            <div class="mt-3">
+              <div class="small text-muted">
+                Click an item to play audio and focus the marker on the map.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right third: Map -->
+      <div class="col-12 col-lg-4">
+        <div class="card shadow-sm panel">
+          <div class="card-body d-flex flex-column">
+            <h4 class="mb-3">Map</h4>
+            <div class="flex-grow-1">
+              <div id="map"></div>
+            </div>
+            <div class="small text-muted mt-2">
+              The predicted province is highlighted. Markers show each submission.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Map setup
+    const map = L.map("map").setView([53.4, -7.8], 6);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    // Fallback centroids (replace later with computed centroids CSV or GeoJSON-derived)
+    const PROVINCE_CENTROIDS = {
+      Leinster: [53.18, -6.65],
+      Munster: [52.13, -8.65],
+      Connacht: [53.45, -9.15],
+      Ulster: [54.65, -6.80]
+    };
+
+    let highlightLayer = null;
+
+    function highlightProvince(province) {
+      if (highlightLayer) map.removeLayer(highlightLayer);
+
+      const ll = PROVINCE_CENTROIDS[province];
+      if (!ll) return;
+
+      highlightLayer = L.circle(ll, { radius: 80000, weight: 2 }).addTo(map);
+      map.panTo(ll);
+    }
+
+    // Marker storage
+    const markersById = new Map();
+
+    function markerIconUrl(correctness) {
+      if (correctness === true) return "https://maps.gstatic.com/mapfiles/ms2/micons/green-dot.png";
+      if (correctness === false) return "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png";
+      return "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png";
+    }
+
+    function addPredictionMarker(pred) {
+      const ll = pred.latlng || PROVINCE_CENTROIDS[pred.predicted_province] || [53.4, -7.8];
+
+      const icon = L.icon({
+        iconUrl: markerIconUrl(pred.correctness),
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -28]
+      });
+
+      const m = L.marker(ll, { icon }).addTo(map);
+      m.bindPopup(
+        `<div><strong>${pred.predicted_province}</strong></div>
+         <div>Confidence: ${(pred.confidence * 100).toFixed(1)}%</div>
+         <div>Correct: ${pred.correctness === true ? "Yes" : pred.correctness === false ? "No" : "Unknown"}</div>`
+      );
+
+      markersById.set(pred.id, m);
+    }
+
+    function focusMarker(id) {
+      const m = markersById.get(id);
+      if (!m) return;
+      map.setView(m.getLatLng(), 8);
+      m.openPopup();
+    }
+
+    // Audio recording
+    const btnStart = document.getElementById("btnStart");
+    const btnStop = document.getElementById("btnStop");
+    const btnRetake = document.getElementById("btnRetake");
+    const btnSubmit = document.getElementById("btnSubmit");
+    const recStatus = document.getElementById("recStatus");
+    const recProgress = document.getElementById("recProgress");
+    const timeLimitEl = document.getElementById("timeLimit");
+    const audioPreview = document.getElementById("audioPreview");
+    const selfProvince = document.getElementById("selfProvince");
+
+    const currentProvinceEl = document.getElementById("currentProvince");
+    const currentConfidenceEl = document.getElementById("currentConfidence");
+    const btnFeedbackRight = document.getElementById("btnFeedbackRight");
+    const btnFeedbackWrong = document.getElementById("btnFeedbackWrong");
+
+    const predList = document.getElementById("predList");
+    const btnClear = document.getElementById("btnClear");
+
+    let mediaRecorder = null;
+    let chunks = [];
+    let audioBlob = null;
+    let audioUrl = null;
+    let recordTimer = null;
+    let recordStartMs = 0;
+
+    function setStatus(text, badgeClass) {
+      recStatus.textContent = text;
+      recStatus.className = "badge " + badgeClass;
+    }
+
+    function setProgress(pct) {
+      recProgress.style.width = `${pct}%`;
+    }
+
+    function resetPreview() {
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      audioBlob = null;
+      audioUrl = null;
+      audioPreview.removeAttribute("src");
+      audioPreview.load();
+      btnRetake.disabled = true;
+      btnSubmit.disabled = true;
+    }
+
+    async function startRecording() {
+      resetPreview();
+      chunks = [];
+
+      const limitSec = Math.max(3, Math.min(30, Number(timeLimitEl.value) || 8));
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        audioBlob = new Blob(chunks, { type: "audio/webm" });
+        audioUrl = URL.createObjectURL(audioBlob);
+        audioPreview.src = audioUrl;
+
+        btnRetake.disabled = false;
+        btnSubmit.disabled = false;
+
+        setStatus("Recorded", "text-bg-success");
+        setProgress(100);
+      };
+
+      mediaRecorder.start();
+      recordStartMs = Date.now();
+      setStatus("Recording", "text-bg-danger");
+      setProgress(0);
+
+      btnStart.disabled = true;
+      btnStop.disabled = false;
+
+      recordTimer = setInterval(() => {
+        const elapsed = (Date.now() - recordStartMs) / 1000;
+        const pct = Math.min(100, (elapsed / limitSec) * 100);
+        setProgress(pct);
+        if (elapsed >= limitSec) stopRecording();
+      }, 100);
+    }
+
+    function stopRecording() {
+      if (!mediaRecorder) return;
+      if (recordTimer) clearInterval(recordTimer);
+      recordTimer = null;
+
+      if (mediaRecorder.state !== "inactive") mediaRecorder.stop();
+
+      btnStart.disabled = false;
+      btnStop.disabled = true;
+      setStatus("Processing", "text-bg-warning");
+    }
+
+    btnStart.addEventListener("click", async () => {
+      try {
+        await startRecording();
+      } catch (err) {
+        setStatus("Mic blocked", "text-bg-danger");
+        alert("Microphone permission is required to record.");
+      }
+    });
+
+    btnStop.addEventListener("click", stopRecording);
+
+    btnRetake.addEventListener("click", () => {
+      resetPreview();
+      setStatus("Idle", "text-bg-secondary");
+      setProgress(0);
+    });
+
+    // Predictions
+    const predictions = [];
+
+    function computeCorrectness(predicted, selfReported) {
+      if (!selfReported) return null;
+      return predicted === selfReported;
+    }
+
+    function renderPredList() {
+      predList.innerHTML = "";
+
+      if (predictions.length === 0) {
+        predList.innerHTML = '<div class="text-muted p-3">No predictions yet.</div>';
+        return;
+      }
+
+      for (const p of predictions.slice().reverse()) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "list-group-item list-group-item-action";
+
+        const correctText =
+          p.correctness === true ? "Yes" :
+          p.correctness === false ? "No" :
+          "Unknown";
+
+        item.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-semibold">${p.predicted_province}</div>
+              <div class="small text-muted">Confidence: ${(p.confidence * 100).toFixed(1)}%</div>
+              <div class="small text-muted">Correct: ${correctText}</div>
+              <div class="small text-muted">Feedback: ${p.user_feedback || "—"}</div>
+            </div>
+            <span class="badge text-bg-dark">${new Date(p.created_at).toLocaleTimeString()}</span>
+          </div>
+          <div class="mt-2">
+            <audio class="audio-mini" controls src="${p.audio_url}"></audio>
+          </div>
+        `;
+
+        item.addEventListener("click", () => {
+          currentProvinceEl.textContent = p.predicted_province;
+          currentConfidenceEl.textContent = `${(p.confidence * 100).toFixed(1)}%`;
+          highlightProvince(p.predicted_province);
+          focusMarker(p.id);
+
+          btnFeedbackRight.disabled = false;
+          btnFeedbackWrong.disabled = false;
+          btnFeedbackRight.dataset.predId = p.id;
+          btnFeedbackWrong.dataset.predId = p.id;
+        });
+
+        predList.appendChild(item);
+      }
+    }
+
+    function setUserFeedback(predId, feedback) {
+      const p = predictions.find(x => x.id === predId);
+      if (!p) return;
+      p.user_feedback = feedback;
+      renderPredList();
+    }
+
+    btnFeedbackRight.addEventListener("click", () => {
+      const id = btnFeedbackRight.dataset.predId;
+      if (id) setUserFeedback(id, "right");
+    });
+
+    btnFeedbackWrong.addEventListener("click", () => {
+      const id = btnFeedbackWrong.dataset.predId;
+      if (id) setUserFeedback(id, "wrong");
+    });
+
+    btnClear.addEventListener("click", () => {
+      predictions.length = 0;
+      for (const m of markersById.values()) map.removeLayer(m);
+      markersById.clear();
+
+      if (highlightLayer) map.removeLayer(highlightLayer);
+      highlightLayer = null;
+
+      currentProvinceEl.textContent = "—";
+      currentConfidenceEl.textContent = "—";
+      btnFeedbackRight.disabled = true;
+      btnFeedbackWrong.disabled = true;
+
+      renderPredList();
+    });
+
+    // Stub prediction (replace with API call)
+    async function fakePredict() {
+      const provinces = ["Leinster", "Munster", "Connacht", "Ulster"];
+      const predicted = provinces[Math.floor(Math.random() * provinces.length)];
+      const confidence = 0.55 + Math.random() * 0.40;
+      return { predicted_province: predicted, confidence };
+    }
+
+    btnSubmit.addEventListener("click", async () => {
+      if (!audioBlob || !audioUrl) return;
+
+      // Replace fakePredict() with an API call later.
+      const data = await fakePredict();
+
+      const selfReport = selfProvince.value || null;
+
+      const pred = {
+        id: crypto.randomUUID(),
+        created_at: Date.now(),
+        predicted_province: data.predicted_province,
+        confidence: data.confidence,
+        self_reported_province: selfReport,
+        correctness: computeCorrectness(data.predicted_province, selfReport),
+        user_feedback: null,
+        audio_url: audioUrl,
+        latlng: null
+      };
+
+      predictions.push(pred);
+
+      currentProvinceEl.textContent = pred.predicted_province;
+      currentConfidenceEl.textContent = `${(pred.confidence * 100).toFixed(1)}%`;
+
+      highlightProvince(pred.predicted_province);
+      addPredictionMarker(pred);
+      renderPredList();
+
+      btnFeedbackRight.disabled = false;
+      btnFeedbackWrong.disabled = false;
+      btnFeedbackRight.dataset.predId = pred.id;
+      btnFeedbackWrong.dataset.predId = pred.id;
+    });
+
+    setStatus("Idle", "text-bg-secondary");
+    setProgress(0);
+    renderPredList();
+  </script>
+</body>
+</html>
