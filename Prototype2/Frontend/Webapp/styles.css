@@ -1,0 +1,11 @@
+html, body { height: 100%; }
+.app-wrap { min-height: 100vh; }
+.panel { height: calc(100vh - 2rem); }
+#map { height: 100%; min-height: 520px; border-radius: 0.75rem; }
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+.scroll { overflow: auto; }
+.audio-mini { width: 100%; }
+.tight { margin-bottom: 0.5rem; }
