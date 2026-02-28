@@ -12,7 +12,7 @@ function markerIconUrl(correctness) {
 }
 
 export function createMapController(mapId) {
-  const map = L.map(mapId).setView([53.4, -7.8], 6);
+  const map = L.map(mapId).setView([53.4, -7.8], 7);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,

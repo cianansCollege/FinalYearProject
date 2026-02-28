@@ -7,7 +7,8 @@ export function createPredictionController(controller) {
     btnFeedbackRight,
     btnFeedbackWrong,
     onSelect,
-    onClear
+    onClear,
+    onChange = () => {}
   } = controller;
 
   const predictions = [];
