@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 # Import from your script
-from add_resolved_paths import find_audio_by_video_id, add_resolved_paths, RESOLVED_COL
+from FixingMetadata.add_resolved_paths import find_audio_by_video_id, add_resolved_paths, RESOLVED_COL
 
 
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict]):
