@@ -1,13 +1,61 @@
-<select id="modelSelect"></select>
-<button id="recordBtn">Record</button>
-<button id="stopBtn">Stop</button>
-<button id="predictBtn">Predict</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototype3 Accent Mapper</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <h1>Prototype3 – Plug-and-Play Accent Mapper</h1>
+      <p>Select a model, record audio, and view the prediction.</p>
+    </header>
 
-<div id="statusMessage"></div>
+    <main class="grid">
+      <section class="panel">
+        <h2>Controls</h2>
 
-<p>Model: <span id="resultModel">-</span></p>
-<p>Prediction: <span id="resultLabel">-</span></p>
-<p>Confidence: <span id="resultConfidence">-</span></p>
-<ul id="probList"></ul>
+        <label for="modelSelect">Model</label>
+        <select id="modelSelect">
+          <option>Loading models...</option>
+        </select>
 
-<div id="map"></div>
+        <div class="button-row">
+          <button id="recordBtn">Start Recording</button>
+          <button id="stopBtn" disabled>Stop Recording</button>
+        </div>
+
+        <audio id="audioPlayback" controls></audio>
+
+        <button id="predictBtn" disabled>Predict Accent</button>
+
+        <div id="statusMessage" class="status">Loading…</div>
+      </section>
+
+      <section class="panel">
+        <h2>Prediction</h2>
+        <p><strong>Model:</strong> <span id="resultModel">-</span></p>
+        <p><strong>Prediction:</strong> <span id="resultLabel">-</span></p>
+        <p><strong>Confidence:</strong> <span id="resultConfidence">-</span></p>
+
+        <h3>Class Probabilities</h3>
+        <ul id="probList"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Map</h2>
+        <div id="map" class="map-box">
+          <div class="province-card" data-province="Leinster">Leinster</div>
+          <div class="province-card" data-province="Munster">Munster</div>
+          <div class="province-card" data-province="Connacht">Connacht</div>
+          <div class="province-card" data-province="Ulster">Ulster</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Dict
 
 from plugins.base import ModelPlugin
 
@@ -22,7 +22,7 @@ def get_model(model_id: str) -> ModelPlugin:
     return _REGISTRY[model_id]
 
 
-def list_models() -> List[dict]:
+def list_models() -> list[dict]:
     return [
         {
             "id": plugin.id,

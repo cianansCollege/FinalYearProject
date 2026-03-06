@@ -1,35 +1,57 @@
 import { fetchModels } from "./api.js";
 import { store } from "./store.js";
+import { initRecording } from "./recording.js";
 
 function setStatus(message) {
-  const el = document.getElementById("statusMessage");
-  if (el) el.textContent = message;
+  document.getElementById("statusMessage").textContent = message;
 }
 
-export async function initModels() {
-  const select = document.getElementById("modelSelect");
+async function initModels() {
+  const modelSelect = document.getElementById("modelSelect");
 
-  const data = await fetchModels();
-  store.models = data.models || [];
+  try {
+    setStatus("Loading models...");
+    const data = await fetchModels();
 
-  select.innerHTML = "";
+    const models = Array.isArray(data.models) ? data.models : [];
+    store.models = models;
+    modelSelect.innerHTML = "";
 
-  for (const model of store.models) {
-    const option = document.createElement("option");
-    option.value = model.id;
-    option.textContent = model.name;
-    select.appendChild(option);
-  }
+    if (models.length === 0) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No models available";
+      modelSelect.appendChild(option);
+      store.selectedModelId = null;
+      setStatus("No models found.");
+      return;
+    }
 
-  store.selectedModelId = store.models[0]?.id || null;
-  if (store.selectedModelId) {
-    select.value = store.selectedModelId;
-  }
+    for (const model of models) {
+      const option = document.createElement("option");
+      option.value = model.id;
+      option.textContent = model.name;
+      modelSelect.appendChild(option);
+    }
 
-  select.addEventListener("change", (event) => {
-    store.selectedModelId = event.target.value;
+    store.selectedModelId = models[0].id;
+    modelSelect.value = store.selectedModelId;
+
+    modelSelect.addEventListener("change", (event) => {
+      store.selectedModelId = event.target.value;
+      setStatus(`Selected model: ${store.selectedModelId}`);
+    });
+
     setStatus(`Selected model: ${store.selectedModelId}`);
-  });
-
-  setStatus(`Selected model: ${store.selectedModelId || "none"}`);
+  } catch (error) {
+    console.error(error);
+    setStatus("Failed to load models.");
+  }
 }
+
+async function initApp() {
+  initRecording();
+  await initModels();
+}
+
+initApp();

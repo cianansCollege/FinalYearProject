@@ -1,0 +1,103 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #1f2933;
+}
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.panel {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+button,
+select {
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+button {
+  cursor: pointer;
+}
+
+#audioPlayback {
+  width: 100%;
+  margin: 16px 0;
+}
+
+#predictBtn {
+  width: 100%;
+}
+
+.status {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #eef2f7;
+}
+
+#probList {
+  padding-left: 20px;
+}
+
+.map-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.province-card {
+  padding: 24px 12px;
+  border: 2px solid #cbd5e1;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: bold;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.province-card.active {
+  border-color: #2563eb;
+  background: #dbeafe;
+  transform: scale(1.02);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

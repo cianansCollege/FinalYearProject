@@ -1,8 +1,12 @@
+const API_BASE = "http://127.0.0.1:8000";
+
 export async function fetchModels() {
-  const response = await fetch("/api/models");
+  const response = await fetch(`${API_BASE}/api/models`);
+
   if (!response.ok) {
     throw new Error("Failed to fetch models");
   }
+
   return await response.json();
 }
 
@@ -11,7 +15,7 @@ export async function predictAudio(audioBlob, modelId) {
   formData.append("audio", audioBlob, "recording.webm");
   formData.append("model_id", modelId);
 
-  const response = await fetch("/api/predict", {
+  const response = await fetch(`${API_BASE}/api/predict`, {
     method: "POST",
     body: formData,
   });

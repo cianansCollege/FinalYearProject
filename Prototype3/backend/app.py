@@ -5,12 +5,26 @@ from __future__ import annotations
 import uuid
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 
 from registry import get_model, list_models
 import plugins  # noqa: F401
 
 
 app = FastAPI(title="Prototype3 Accent API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/api/health")
+def health() -> dict:
+    return {"status": "ok"}
 
 
 @app.get("/api/models")
@@ -28,8 +42,12 @@ async def api_predict(
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    wav_bytes = await audio.read()
-    result = model.predict(wav_bytes)
+    audio_bytes = await audio.read()
+
+    if not audio_bytes:
+        raise HTTPException(status_code=400, detail="Empty audio upload")
+
+    result = model.predict(audio_bytes)
 
     return {
         "request_id": str(uuid.uuid4()),
