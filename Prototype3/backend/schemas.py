@@ -1,0 +1,1 @@
+# schemas.py keeps request/response shapes tidy
