@@ -1,11 +1,23 @@
 import pandas as pd
 import time
+import sys
+from pathlib import Path
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 
+for parent in Path(__file__).resolve().parents:
+    if (parent / "project_paths.py").exists():
+        if str(parent) not in sys.path:
+            sys.path.insert(0, str(parent))
+        break
+else:
+    raise RuntimeError("Could not locate project_paths.py")
+
+from project_paths import data_path, metadata_path
+
 # -------- CONFIG --------
-INPUT_CSV = "/Users/cianan/Documents/College/GitHub/FYP/Prototype2/all_segments_index_with_resolved_paths.csv"
-OUTPUT_CSV = "speaker_master_with_coords.csv"
+INPUT_CSV = metadata_path("all_segments_index_with_resolved_paths.csv")
+OUTPUT_CSV = data_path("speaker_master_with_coords.csv")
 USER_AGENT = "fyp_accent_mapping_project"
 # ------------------------
 

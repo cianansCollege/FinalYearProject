@@ -29,6 +29,16 @@ from sklearn.linear_model import LogisticRegression
 
 np.random.seed(42)
 
+for parent in Path(__file__).resolve().parents:
+    if (parent / "project_paths.py").exists():
+        if str(parent) not in sys.path:
+            sys.path.insert(0, str(parent))
+        break
+else:
+    raise RuntimeError("Could not locate project_paths.py")
+
+from project_paths import data_path
+
 SCRIPT_PATH = Path("train_province_mfcc_baseline.py").resolve()
 print("Script path:", SCRIPT_PATH)
 print("Python:", sys.version)
@@ -42,7 +52,7 @@ print("Python:", sys.version)
 
 # %%
 # Paths (edit)
-INDEX_CSV = "/Users/cianan/Documents/College/GitHub/FYP/Prototype2/Data/speaker_master_clean_10s_lufs.csv"          # Path(".../your_index.csv").resolve()
+INDEX_CSV = data_path("speaker_master_clean_10s_lufs.csv")
 AUDIO_BASE_DIR = None     # Only needed if you compute MFCCs from wav paths
 
 # Column names in your index CSV
@@ -302,8 +312,8 @@ plt.show()
 
 
 # %%
-with open("output_count.txt", "wr"):
-    
+with open("output_count.txt", "w", encoding="utf-8") as f:
+    f.write(f"total_predictions={len(all_pred)}\n")
 
 OUT_DIR = Path("notebook_outputs").resolve()
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -313,6 +323,4 @@ np.savetxt(OUT_DIR / "confusion_matrix_row_normalized.csv", cm_norm, delimiter="
 metrics_df.to_csv(OUT_DIR / "per_class_metrics.csv")
 
 print("Saved to:", OUT_DIR)
-
-
 

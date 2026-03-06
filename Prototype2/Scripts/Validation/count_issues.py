@@ -1,7 +1,19 @@
 import csv
 import os
+import sys
+from pathlib import Path
 
-path = "/Users/cianan/Documents/College/GitHub/FYP/Prototype2/all_segments_index_with_resolved_paths.csv"
+for parent in Path(__file__).resolve().parents:
+    if (parent / "project_paths.py").exists():
+        if str(parent) not in sys.path:
+            sys.path.insert(0, str(parent))
+        break
+else:
+    raise RuntimeError("Could not locate project_paths.py")
+
+from project_paths import metadata_path
+
+path = metadata_path("all_segments_index_with_resolved_paths.csv")
 
 missing = []
 with open(path, newline="", encoding="utf-8-sig") as f:

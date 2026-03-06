@@ -15,9 +15,20 @@ from __future__ import annotations
 
 import hashlib
 import subprocess
+import sys
 from pathlib import Path
 
 import pandas as pd
+
+for parent in Path(__file__).resolve().parents:
+    if (parent / "project_paths.py").exists():
+        if str(parent) not in sys.path:
+            sys.path.insert(0, str(parent))
+        break
+else:
+    raise RuntimeError("Could not locate project_paths.py")
+
+from project_paths import data_path
 
 
 # =============================================================================
@@ -25,13 +36,13 @@ import pandas as pd
 # =============================================================================
 
 # Your input segments CSV (the one you train from currently)
-IN_CSV = Path("/Users/cianan/Documents/College/GitHub/FYP/Prototype2/speaker_master_main.csv")
+IN_CSV = data_path("speaker_master_main.csv")
 
 # Where to write cleaned WAVs
-OUT_DIR = Path("/Users/cianan/Documents/College/GitHub/FYP/Prototype2/Data/segments_clean_lufs10s")
+OUT_DIR = data_path("segments_clean_lufs10s")
 
 # Where to write the updated CSV
-OUT_CSV = Path("/Users/cianan/Documents/College/GitHub/FYP/Prototype2/segments_clean_index.csv")
+OUT_CSV = data_path("segments_clean_index.csv")
 
 # Column names in your CSV
 PATH_COL = "segment_file_resolved"

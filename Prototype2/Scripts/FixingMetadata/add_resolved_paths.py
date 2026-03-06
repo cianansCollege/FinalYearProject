@@ -1,12 +1,23 @@
 import csv
 import os
 import glob
+import sys
+from pathlib import Path
 from typing import Dict, List
 
-IN_PATH = "/Users/cianan/Documents/College/GitHub/FYP/Prototype2/all_segments_index.csv"
-OUT_PATH = "/Users/cianan/Documents/College/GitHub/FYP/Prototype2/all_segments_index_with_resolved_paths.csv"
+for parent in Path(__file__).resolve().parents:
+    if (parent / "project_paths.py").exists():
+        if str(parent) not in sys.path:
+            sys.path.insert(0, str(parent))
+        break
+else:
+    raise RuntimeError("Could not locate project_paths.py")
 
-DAIL_DIR = "/Users/cianan/Documents/College/GitHub/FYP/Prototype2/DailData/roi_audio_processed"
+from project_paths import data_path, metadata_path
+
+IN_PATH = str(metadata_path("all_segments_index.csv"))
+OUT_PATH = str(metadata_path("all_segments_index_with_resolved_paths.csv"))
+DAIL_DIR = str(data_path("DailData", "roi_audio_processed"))
 
 RESOLVED_COL = "segment_file_resolved"
 

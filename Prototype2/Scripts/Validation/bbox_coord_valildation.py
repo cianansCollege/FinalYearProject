@@ -1,8 +1,20 @@
 import pandas as pd
+import sys
+from pathlib import Path
 
-INPUT = "speaker_master_with_coords.csv"
-OUT_BAD = "coords_outside_ireland_bbox.csv"
-OUT_MISSING = "coords_missing.csv"
+for parent in Path(__file__).resolve().parents:
+    if (parent / "project_paths.py").exists():
+        if str(parent) not in sys.path:
+            sys.path.insert(0, str(parent))
+        break
+else:
+    raise RuntimeError("Could not locate project_paths.py")
+
+from project_paths import data_path, metadata_path
+
+INPUT = data_path("speaker_master_with_coords.csv")
+OUT_BAD = metadata_path("coords_outside_ireland_bbox.csv")
+OUT_MISSING = metadata_path("coords_missing.csv")
 
 # Generous bounding box covering island of Ireland
 MIN_LAT, MAX_LAT = 51.0, 55.6

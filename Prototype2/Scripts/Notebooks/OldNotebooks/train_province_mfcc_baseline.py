@@ -1,6 +1,8 @@
 import os
 import re
 import random
+import sys
+from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
@@ -12,8 +14,18 @@ from sklearn.metrics import classification_report, confusion_matrix
 
 import librosa
 
+for parent in Path(__file__).resolve().parents:
+    if (parent / "project_paths.py").exists():
+        if str(parent) not in sys.path:
+            sys.path.insert(0, str(parent))
+        break
+else:
+    raise RuntimeError("Could not locate project_paths.py")
 
-DATA_CSV = "/Users/cianan/Documents/College/GitHub/FYP/Prototype2/all_segments_index_with_resolved_paths.csv"
+from project_paths import metadata_path
+
+
+DATA_CSV = metadata_path("all_segments_index_with_resolved_paths.csv")
 
 # Prefer resolved paths (DÁIL), fall back to original (NI)
 AUDIO_COL_PRIMARY = "segment_file_resolved"
