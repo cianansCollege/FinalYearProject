@@ -1,0 +1,25 @@
+export async function fetchModels() {
+  const response = await fetch("/api/models");
+  if (!response.ok) {
+    throw new Error("Failed to fetch models");
+  }
+  return await response.json();
+}
+
+export async function predictAudio(audioBlob, modelId) {
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "recording.webm");
+  formData.append("model_id", modelId);
+
+  const response = await fetch("/api/predict", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || "Prediction failed");
+  }
+
+  return await response.json();
+}
