@@ -1,1 +1,1 @@
-# schemas.py keeps request/response shapes tidy
+# Pydantic request and response schema definitions for API payloads.

@@ -1,3 +1,5 @@
+"""Deterministic dummy model plugin used to test end-to-end API/frontend flow."""
+
 from __future__ import annotations
 
 from plugins.base import ModelPlugin

@@ -1,3 +1,5 @@
+// Frontend bootstrap that initializes model loading and recording controls.
+
 import { fetchModels } from "./api.js";
 import { store } from "./store.js";
 import { initRecording } from "./recording.js";

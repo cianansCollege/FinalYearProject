@@ -1,4 +1,4 @@
-# registry.py stores available model plugins
+# In-memory registry for model plugin instances and model metadata listing.
 
 from __future__ import annotations
 

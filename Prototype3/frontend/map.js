@@ -1,3 +1,5 @@
+// Province card highlight helpers for displaying the predicted label.
+
 export function updateMap(label) {
   const cards = document.querySelectorAll(".province-card");
 

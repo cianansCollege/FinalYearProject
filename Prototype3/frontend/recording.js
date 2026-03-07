@@ -1,3 +1,5 @@
+// Microphone capture flow and predict-button wiring for the frontend.
+
 import { store } from "./store.js";
 import { predictAudio } from "./api.js";
 import { renderPrediction, renderError } from "./predictions.js";

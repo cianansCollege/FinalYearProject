@@ -1,3 +1,5 @@
+"""Abstract plugin contract that every backend model implementation must follow."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

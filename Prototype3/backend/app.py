@@ -1,4 +1,4 @@
-# app.py exposes /api/models and /api/predict
+# FastAPI entrypoint exposing health, model listing, and prediction endpoints.
 
 from __future__ import annotations
 

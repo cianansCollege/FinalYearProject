@@ -1,3 +1,5 @@
+// Prediction rendering helpers for success and error states in the UI.
+
 export function renderPrediction(result) {
   document.getElementById("resultModel").textContent = result.model_id || "-";
   document.getElementById("resultLabel").textContent = result.label || "-";

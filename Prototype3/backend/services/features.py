@@ -1,1 +1,1 @@
-# features.py handles MFCC extraction
+# Feature extraction helpers (for example MFCC vectors) used by plugins.
