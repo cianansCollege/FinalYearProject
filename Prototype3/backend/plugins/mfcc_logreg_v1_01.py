@@ -13,7 +13,7 @@ from services.features import extract_mfcc_summary_features
 
 
 class MFCCLogRegV1(ModelPlugin):
-    id = "mfcc_logreg_v1"
+    id = "mfcc_logreg_v1_01"
     name = "MFCC + Logistic Regression (v1)"
     description = "MFCC summary features with a Logistic Regression classifier."
 
