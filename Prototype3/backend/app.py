@@ -7,9 +7,11 @@ import uuid
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
+from plugin_loader import load_plugins
 from registry import get_model, list_models
-import plugins  # noqa: F401
 
+
+load_plugins()
 
 app = FastAPI(title="Prototype3 Accent API")
 
