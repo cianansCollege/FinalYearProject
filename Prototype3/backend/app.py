@@ -3,15 +3,21 @@
 from __future__ import annotations
 
 import uuid
+from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from plugin_loader import load_plugins
 from registry import get_model, list_models
 
 
 load_plugins()
+
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR.parent / "frontend"
 
 app = FastAPI(title="Prototype3 Accent API")
 
@@ -22,6 +28,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+
+@app.get("/")
+def read_index():
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 
 @app.get("/api/health")
