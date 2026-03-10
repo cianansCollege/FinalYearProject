@@ -15,7 +15,18 @@ async function initModels() {
     setStatus("Loading models...");
     const data = await fetchModels();
 
-    const models = Array.isArray(data.models) ? data.models : [];
+    const rawModels = Array.isArray(data.models) ? data.models : [];
+
+    const models = rawModels.map((model) => {
+      if (typeof model === "string") {
+        return { id: model, name: model };
+      }
+      return {
+        id: model.id,
+        name: model.name ?? model.id,
+      };
+    });
+
     store.models = models;
     modelSelect.innerHTML = "";
 

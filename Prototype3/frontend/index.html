@@ -11,7 +11,7 @@
   <div class="page">
     <header class="header">
       <h1>Prototype3 – Plug-and-Play Accent Mapper</h1>
-      <p>Select a model, record audio, and view the prediction.</p>
+      <p>Select a model, record audio, upload audio, and view the prediction.</p>
     </header>
 
     <main class="grid">
@@ -27,6 +27,10 @@
           <button id="recordBtn">Start Recording</button>
           <button id="stopBtn" disabled>Stop Recording</button>
         </div>
+        <div id="recordingCountdown" class="countdown">Minimum 10 seconds</div>
+
+        <label for="audioFile">Upload audio file</label>
+        <input id="audioFile" type="file" accept=".wav,.mp3,.m4a,.ogg,.flac,audio/*" />
 
         <audio id="audioPlayback" controls></audio>
 

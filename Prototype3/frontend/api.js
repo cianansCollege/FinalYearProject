@@ -12,9 +12,15 @@ export async function fetchModels() {
   return await response.json();
 }
 
-export async function predictAudio(audioBlob, modelId) {
+export async function predictAudio(audioSource, modelId) {
   const formData = new FormData();
-  formData.append("audio", audioBlob, "recording.webm");
+
+  if (audioSource instanceof File) {
+    formData.append("audio", audioSource, audioSource.name);
+  } else {
+    formData.append("audio", audioSource, "recording.webm");
+  }
+
   formData.append("model_id", modelId);
 
   const response = await fetch(`${API_BASE}/api/predict`, {
