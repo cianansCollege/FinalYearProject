@@ -20,8 +20,8 @@ class MFCCLogRegV1(ModelPlugin):
     def __init__(self) -> None:
         model_dir = Path(__file__).resolve().parent.parent / "artifacts"
 
-        self.model = joblib.load(model_dir / "mfcc_logreg_v1_label_encoder_01.joblib")
-        self.label_encoder = joblib.load(model_dir / "mfcc_logreg_v1_model_01.joblib")
+        self.model = joblib.load(model_dir / "mfcc_logreg_v1_model_01.joblib")
+        self.label_encoder = joblib.load(model_dir / "mfcc_logreg_v1_label_encoder_01.joblib")
 
     def predict(self, audio_bytes: bytes) -> dict:
         waveform, sr = load_audio_from_bytes(audio_bytes)

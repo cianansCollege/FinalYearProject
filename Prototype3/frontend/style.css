@@ -1,118 +1,71 @@
-/* Page, panel, controls, and map-card styles for the Prototype3 frontend. */
-
-* {
-  box-sizing: border-box;
-}
+/* Bootstrap-first overrides and custom map styling for Prototype3. */
 
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  color: #1f2933;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
 }
 
-.page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-.header {
-  margin-bottom: 24px;
-}
-
-.header h1 {
-  margin-bottom: 8px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.panel {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-}
-
-.button-row {
-  display: flex;
-  gap: 10px;
-  margin: 16px 0;
-}
-
-button,
-select {
-  padding: 10px 12px;
-  font-size: 1rem;
-  margin-top: 8px;
-}
-
-button {
-  cursor: pointer;
+.card {
+  border-radius: 1rem;
 }
 
 button:disabled {
   cursor: not-allowed;
 }
 
-#audioPlayback {
-  width: 100%;
-  margin: 16px 0;
+#recordingCountdown {
+  font-size: 0.875rem;
 }
 
-#predictBtn {
-  width: 100%;
-  border: 1px solid #cbd5e1;
+#statusMessage {
+  font-size: 0.95rem;
+}
+
+#predictBtn:disabled {
+  border-color: #cbd5e1;
   background: #cbd5e1;
   color: #64748b;
 }
 
 #predictBtn:not(:disabled) {
-  border-color: #1d4ed8;
-  background: #2563eb;
+  border-color: #0d6efd;
+  background: #0d6efd;
   color: #ffffff;
 }
 
-.status {
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 10px;
-  background: #eef2f7;
+#probList {
+  margin-top: 0.5rem;
 }
 
-#probList {
-  padding-left: 20px;
+#probList li {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .map-box {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 .province-card {
-  padding: 24px 12px;
-  border: 2px solid #cbd5e1;
-  border-radius: 14px;
+  padding: 1.2rem 0.8rem;
+  border: 2px solid #dbe3ee;
+  border-radius: 0.9rem;
   text-align: center;
-  font-weight: bold;
+  font-weight: 600;
   background: #f8fafc;
   transition: all 0.2s ease;
 }
 
 .province-card.active {
-  border-color: #2563eb;
-  background: #dbeafe;
-  transform: scale(1.02);
+  border-color: #0d6efd;
+  background: #e7f1ff;
+  transform: translateY(-1px);
 }
 
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr;
+@media (max-width: 575.98px) {
+  .province-card {
+    padding: 1rem 0.6rem;
   }
 }

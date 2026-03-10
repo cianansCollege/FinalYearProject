@@ -9,6 +9,9 @@ let mediaRecorder = null;
 let audioChunks = [];
 let playbackObjectUrl = null;
 let recordingStartTime = null;
+let recordingTimerId = null;
+
+const MIN_RECORDING_SECONDS = 10;
 
 function setStatus(message) {
   document.getElementById("statusMessage").textContent = message;
@@ -20,6 +23,7 @@ export function initRecording() {
   const predictBtn = document.getElementById("predictBtn");
   const audioPlayback = document.getElementById("audioPlayback");
   const audioFileInput = document.getElementById("audioFile");
+  const recordingCountdown = document.getElementById("recordingCountdown");
 
   if (!recordBtn || !stopBtn || !predictBtn || !audioPlayback) {
     console.error("Recording controls are missing from the page.");
@@ -49,6 +53,57 @@ export function initRecording() {
     predictBtn.disabled = !hasAudioSource;
   }
 
+  function stopRecordingTimer() {
+    if (recordingTimerId) {
+      clearInterval(recordingTimerId);
+      recordingTimerId = null;
+    }
+  }
+
+  function setCountdownDefault() {
+    if (!recordingCountdown) {
+      return;
+    }
+
+    recordingCountdown.textContent = `Minimum ${MIN_RECORDING_SECONDS} seconds`;
+    recordingCountdown.classList.remove("text-danger", "text-success");
+    recordingCountdown.classList.add("text-body-secondary");
+  }
+
+  function renderRecordingTimer(elapsedSeconds) {
+    if (!recordingCountdown) {
+      return;
+    }
+
+    const remainingSeconds = Math.max(0, MIN_RECORDING_SECONDS - elapsedSeconds);
+
+    if (remainingSeconds > 0) {
+      recordingCountdown.textContent =
+        `Minimum ${MIN_RECORDING_SECONDS}s: ${remainingSeconds.toFixed(1)}s remaining`;
+      recordingCountdown.classList.remove("text-danger", "text-success");
+      recordingCountdown.classList.add("text-body-secondary");
+      return;
+    }
+
+    recordingCountdown.textContent =
+      `Minimum ${MIN_RECORDING_SECONDS}s reached. You can stop recording.`;
+    recordingCountdown.classList.remove("text-danger", "text-body-secondary");
+    recordingCountdown.classList.add("text-success");
+  }
+
+  function startRecordingTimer() {
+    stopRecordingTimer();
+    renderRecordingTimer(0);
+    recordingTimerId = setInterval(() => {
+      if (!recordingStartTime) {
+        return;
+      }
+      const elapsedSeconds = (Date.now() - recordingStartTime) / 1000;
+      renderRecordingTimer(elapsedSeconds);
+    }, 100);
+  }
+
+  setCountdownDefault();
   refreshPredictButtonState();
 
   recordBtn.addEventListener("click", async () => {
@@ -60,6 +115,7 @@ export function initRecording() {
       store.latestAudioBlob = null;
       store.uploadedAudioFile = null;
       setPlaybackSource(null);
+      startRecordingTimer();
 
       mediaRecorder = new MediaRecorder(stream);
 
@@ -70,16 +126,30 @@ export function initRecording() {
       };
 
       mediaRecorder.onstop = () => {
+        stopRecordingTimer();
         const durationSeconds = (Date.now() - recordingStartTime) / 1000;
 
-        if (durationSeconds < 10) {
+        if (durationSeconds < MIN_RECORDING_SECONDS) {
+          if (recordingCountdown) {
+            recordingCountdown.textContent =
+              `Too short: ${durationSeconds.toFixed(1)}s recorded. Minimum is ${MIN_RECORDING_SECONDS}s.`;
+            recordingCountdown.classList.remove("text-success", "text-body-secondary");
+            recordingCountdown.classList.add("text-danger");
+          }
           store.latestAudioBlob = null;
           setPlaybackSource(null);
           refreshPredictButtonState();
           setStatus(
-            `Recording too short (${durationSeconds.toFixed(1)}s). Minimum is 10 seconds.`
+            `Recording too short (${durationSeconds.toFixed(1)}s). Minimum is ${MIN_RECORDING_SECONDS} seconds.`
           );
           return;
+        }
+
+        if (recordingCountdown) {
+          recordingCountdown.textContent =
+            `Recorded ${durationSeconds.toFixed(1)}s. Minimum met.`;
+          recordingCountdown.classList.remove("text-danger", "text-body-secondary");
+          recordingCountdown.classList.add("text-success");
         }
 
         const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
@@ -98,9 +168,11 @@ export function initRecording() {
       recordBtn.disabled = true;
       stopBtn.disabled = false;
       refreshPredictButtonState();
-      setStatus("Recording... minimum length is 10 seconds.");
+      setStatus(`Recording... minimum length is ${MIN_RECORDING_SECONDS} seconds.`);
     } catch (error) {
       console.error(error);
+      stopRecordingTimer();
+      setCountdownDefault();
       setStatus("Could not access microphone.");
     }
   });
@@ -127,6 +199,8 @@ export function initRecording() {
       store.latestAudioBlob = null;
 
       setPlaybackSource(file);
+      stopRecordingTimer();
+      setCountdownDefault();
       refreshPredictButtonState();
 
       setStatus(`Audio file selected: ${file.name}`);

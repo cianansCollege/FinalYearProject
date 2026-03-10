@@ -62,7 +62,15 @@ async def api_predict(
     if not audio_bytes:
         raise HTTPException(status_code=400, detail="Empty audio upload")
 
-    result = model.predict(audio_bytes)
+    try:
+        result = model.predict(audio_bytes)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Prediction failed for model '{model_id}'.",
+        ) from exc
 
     return {
         "request_id": str(uuid.uuid4()),
