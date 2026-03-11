@@ -2,7 +2,12 @@
 
 import { store } from "./store.js";
 import { predictAudio } from "./api.js";
-import { renderPrediction, renderError } from "./predictions.js";
+import {
+  renderPrediction,
+  renderError,
+  savePrediction,
+  updatePredictionFeedback,
+} from "./predictions.js";
 import { updateMap, clearMapHighlight } from "./map.js";
 
 let mediaRecorder = null;
@@ -24,6 +29,13 @@ export function initRecording() {
   const audioPlayback = document.getElementById("audioPlayback");
   const audioFileInput = document.getElementById("audioFile");
   const recordingCountdown = document.getElementById("recordingCountdown");
+
+  const feedbackYesBtn = document.getElementById("feedbackYesBtn");
+  const feedbackNoBtn = document.getElementById("feedbackNoBtn");
+  const correctLabelSection = document.getElementById("correctLabelSection");
+  const correctLabelSelect = document.getElementById("correctLabelSelect");
+  const saveCorrectionBtn = document.getElementById("saveCorrectionBtn");
+  const feedbackMessage = document.getElementById("feedbackMessage");
 
   if (!recordBtn || !stopBtn || !predictBtn || !audioPlayback) {
     console.error("Recording controls are missing from the page.");
@@ -238,6 +250,8 @@ export function initRecording() {
         store.selectedModelId
       );
 
+      savePrediction(result);
+      console.log("Prediction saved:", store.predictions);
       renderPrediction(result);
 
       const predictedLabel = result.label ?? result.predicted_label ?? null;
@@ -252,4 +266,64 @@ export function initRecording() {
       setStatus(`Prediction failed: ${error.message}`);
     }
   });
+
+  if (feedbackYesBtn) {
+    feedbackYesBtn.addEventListener("click", () => {
+      const updated = updatePredictionFeedback({
+        wasCorrect: true,
+        correctedLabel: null,
+      });
+
+      if (!updated) {
+        return;
+      }
+
+      if (correctLabelSection) {
+        correctLabelSection.classList.add("d-none");
+      }
+
+      if (feedbackMessage) {
+        feedbackMessage.textContent = "Thanks — marked as correct.";
+      }
+    });
+  }
+
+  if (feedbackNoBtn) {
+    feedbackNoBtn.addEventListener("click", () => {
+      if (correctLabelSection) {
+        correctLabelSection.classList.remove("d-none");
+      }
+
+      if (feedbackMessage) {
+        feedbackMessage.textContent = "Please select the correct province.";
+      }
+    });
+  }
+
+  if (saveCorrectionBtn) {
+    saveCorrectionBtn.addEventListener("click", () => {
+      const correctedLabel = correctLabelSelect?.value ?? "";
+
+      if (!correctedLabel) {
+        if (feedbackMessage) {
+          feedbackMessage.textContent = "Please choose the correct province first.";
+        }
+        return;
+      }
+
+      const updated = updatePredictionFeedback({
+        wasCorrect: false,
+        correctedLabel,
+      });
+
+      if (!updated) {
+        return;
+      }
+
+      if (feedbackMessage) {
+        feedbackMessage.textContent =
+          `Saved — marked incorrect, correct province: ${correctedLabel}.`;
+      }
+    });
+  }
 }

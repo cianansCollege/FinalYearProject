@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<!-- Main UI layout for model controls, prediction output, and map highlight. -->
+<!-- Main UI layout for model controls, prediction output, prediction history, and map highlight. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prototype3 Accent Mapper</title>
+
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -17,21 +18,22 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <div class="container-fluid px-4 pt-1 pb-3">
-    <header class="mb-1">
+  <div class="container-fluid px-4 pt-1 pb-3 app-shell">
+    <header class="mb-2 app-header">
       <h1 class="h2 mb-2">Prototype3 - Plug-and-Play Accent Mapper</h1>
       <p class="text-body-secondary mb-0">
         Select a model, record audio, upload audio, and view the prediction.
       </p>
     </header>
 
-    <main class="row g-1">
-      <section class="col-12 col-lg-4">
-        <div class="card shadow-sm h-100 border-0">
-          <div class="card-body">
+    <main class="row g-2 app-main">
+      <!-- Controls -->
+      <section class="col-12 col-lg-4 d-flex">
+        <div class="card shadow-sm h-100 w-100 border-0">
+          <div class="card-body d-flex flex-column">
             <h2 class="h5 card-title mb-3">Controls</h2>
 
             <label for="modelSelect" class="form-label">Model</label>
@@ -40,13 +42,14 @@
             </select>
 
             <div class="d-flex gap-2 my-3">
-              <button id="recordBtn" class="btn btn-outline-primary w-100">
+              <button id="recordBtn" class="btn btn-outline-primary w-100" type="button">
                 Start Recording
               </button>
-              <button id="stopBtn" class="btn btn-outline-secondary w-100" disabled>
+              <button id="stopBtn" class="btn btn-outline-secondary w-100" type="button" disabled>
                 Stop Recording
               </button>
             </div>
+
             <div id="recordingCountdown" class="form-text mb-3">
               Minimum 10 seconds
             </div>
@@ -61,7 +64,7 @@
 
             <audio id="audioPlayback" class="w-100 my-3" controls></audio>
 
-            <button id="predictBtn" class="btn btn-secondary w-100" disabled>
+            <button id="predictBtn" class="btn btn-secondary w-100" type="button" disabled>
               Predict Accent
             </button>
 
@@ -72,47 +75,96 @@
         </div>
       </section>
 
-      <section class="col-12 col-lg-4">
-        <div class="d-flex flex-column h-100 prediction-stack">
-          <div class="card shadow-sm border-0 prediction-card-current">
-            <div class="card-body">
-              <h2 class="h5 card-title mb-3">Current Prediction</h2>
-              <p class="mb-2"><strong>Model:</strong> <span id="resultModel">-</span></p>
-              <p class="mb-2"><strong>Prediction:</strong> <span id="resultLabel">-</span></p>
-              <p class="mb-3"><strong>Confidence:</strong> <span id="resultConfidence">-</span></p>
-
-              <h3 class="h6 text-uppercase text-body-secondary mb-2">Class Probabilities</h3>
-              <ul id="probList" class="list-group list-group-flush"></ul>
+      <!-- Middle column: History + Current Prediction -->
+      <section class="col-12 col-lg-4 d-flex flex-column gap-2">
+        <!-- Prediction History -->
+        <div class="card shadow-sm border-0 history-card">
+          <div class="card-body">
+            <h2 class="h5 card-title mb-3">Prediction History</h2>
+            <div id="predictionHistoryPlaceholder" class="text-body-secondary small">
+              No previous predictions yet.
             </div>
+            <div id="predictionHistoryList" class="d-none"></div>
           </div>
+        </div>
 
-          <div class="card shadow-sm border-0 prediction-card-history">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h5 card-title mb-0">Previous Predictions</h2>
-                <span class="badge text-bg-dark border">0</span>
+        <!-- Current Prediction -->
+        <div class="card shadow-sm border-0 flex-grow-1">
+          <div class="card-body">
+            <h2 class="h5 card-title mb-3">Current Prediction</h2>
+
+            <p class="mb-2"><strong>Model:</strong> <span id="resultModel">-</span></p>
+            <p class="mb-2"><strong>Prediction:</strong> <span id="resultLabel">-</span></p>
+            <p class="mb-3"><strong>Confidence:</strong> <span id="resultConfidence">-</span></p>
+
+            <h3 class="h6 text-uppercase text-body-secondary mb-2">Class Probabilities</h3>
+            <ul id="probList" class="list-group list-group-flush mb-3"></ul>
+
+            <div id="feedbackSection" class="mt-4 d-none">
+              <h3 class="h6 text-uppercase text-body-secondary mb-2">Feedback</h3>
+
+              <p class="mb-2">Was this prediction correct?</p>
+
+              <div class="d-flex gap-2 mb-3">
+                <button
+                  id="feedbackYesBtn"
+                  type="button"
+                  class="btn btn-outline-success btn-sm w-100"
+                >
+                  Yes
+                </button>
+                <button
+                  id="feedbackNoBtn"
+                  type="button"
+                  class="btn btn-outline-danger btn-sm w-100"
+                >
+                  No
+                </button>
               </div>
 
-              <div class="prediction-history-list">
-                <div class="prediction-history-empty">
-                  No previous predictions yet.
-                </div>
+              <div id="correctLabelSection" class="d-none">
+                <label for="correctLabelSelect" class="form-label">
+                  Select the correct province
+                </label>
+                <select id="correctLabelSelect" class="form-select form-select-sm">
+                  <option value="">Choose province</option>
+                  <option value="Leinster">Leinster</option>
+                  <option value="Munster">Munster</option>
+                  <option value="Connacht">Connacht</option>
+                  <option value="Ulster">Ulster</option>
+                </select>
+
+                <button
+                  id="saveCorrectionBtn"
+                  type="button"
+                  class="btn btn-sm btn-primary mt-2"
+                >
+                  Save correction
+                </button>
               </div>
+
+              <div id="feedbackMessage" class="form-text mt-2"></div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="col-12 col-lg-4">
-        <div class="card shadow-sm h-100 border-0">
-          <div class="card-body">
+      <!-- Map -->
+      <section class="col-12 col-lg-4 d-flex">
+        <div class="card shadow-sm h-100 w-100 border-0">
+          <div class="card-body d-flex flex-column">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h2 class="h5 card-title mb-0">Map</h2>
-              <button id="resetMapBtn" class="btn btn-sm btn-outline-secondary" type="button">
+              <button
+                id="resetMapBtn"
+                class="btn btn-sm btn-outline-secondary"
+                type="button"
+              >
                 Reset View
               </button>
             </div>
-            <div id="map" class="map-box"></div>
+
+            <div id="map" class="map-box flex-grow-1"></div>
           </div>
         </div>
       </section>

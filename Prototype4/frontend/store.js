@@ -5,4 +5,6 @@ export const store = {
   selectedModelId: null,
   latestAudioBlob: null,
   uploadedAudioFile: null,
+  predictions: [],
+  currentPredictionId: null,
 };
