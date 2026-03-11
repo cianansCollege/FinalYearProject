@@ -36,6 +36,7 @@ main.row > section {
 .card {
   width: 100%;
   height: 100%;
+  min-height: 0;
   border-radius: 0;
   border: 2px solid #314155;
   background: #182230;
@@ -48,6 +49,47 @@ main.row > section {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+}
+
+.prediction-stack {
+  gap: 0.5rem;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.prediction-card-current,
+.prediction-card-history {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.prediction-card-current {
+  flex: 0 0 54%;
+}
+
+.prediction-card-history {
+  flex: 1 1 46%;
+}
+
+.prediction-card-current .card-body,
+.prediction-card-history .card-body {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.prediction-history-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid #314155;
+  background: #111827;
+  padding: 0.75rem;
+}
+
+.prediction-history-empty {
+  color: #9fb0c3;
+  font-size: 0.95rem;
 }
 
 h1,
@@ -227,6 +269,10 @@ button:disabled {
   }
 
   main.row > section .card {
+    min-height: 0;
+  }
+
+  .prediction-stack {
     min-height: 100%;
   }
 
@@ -244,5 +290,14 @@ button:disabled {
 
   .map-box {
     min-height: 420px;
+  }
+
+  .prediction-card-current,
+  .prediction-card-history {
+    flex: 0 0 auto;
+  }
+
+  .prediction-history-list {
+    min-height: 180px;
   }
 }

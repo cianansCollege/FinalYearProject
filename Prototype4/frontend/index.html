@@ -73,15 +73,32 @@
       </section>
 
       <section class="col-12 col-lg-4">
-        <div class="card shadow-sm h-100 border-0">
-          <div class="card-body">
-            <h2 class="h5 card-title mb-3">Prediction</h2>
-            <p class="mb-2"><strong>Model:</strong> <span id="resultModel">-</span></p>
-            <p class="mb-2"><strong>Prediction:</strong> <span id="resultLabel">-</span></p>
-            <p class="mb-3"><strong>Confidence:</strong> <span id="resultConfidence">-</span></p>
+        <div class="d-flex flex-column h-100 prediction-stack">
+          <div class="card shadow-sm border-0 prediction-card-current">
+            <div class="card-body">
+              <h2 class="h5 card-title mb-3">Current Prediction</h2>
+              <p class="mb-2"><strong>Model:</strong> <span id="resultModel">-</span></p>
+              <p class="mb-2"><strong>Prediction:</strong> <span id="resultLabel">-</span></p>
+              <p class="mb-3"><strong>Confidence:</strong> <span id="resultConfidence">-</span></p>
 
-            <h3 class="h6 text-uppercase text-body-secondary mb-2">Class Probabilities</h3>
-            <ul id="probList" class="list-group list-group-flush"></ul>
+              <h3 class="h6 text-uppercase text-body-secondary mb-2">Class Probabilities</h3>
+              <ul id="probList" class="list-group list-group-flush"></ul>
+            </div>
+          </div>
+
+          <div class="card shadow-sm border-0 prediction-card-history">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 card-title mb-0">Previous Predictions</h2>
+                <span class="badge text-bg-dark border">0</span>
+              </div>
+
+              <div class="prediction-history-list">
+                <div class="prediction-history-empty">
+                  No previous predictions yet.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
