@@ -1,0 +1,84 @@
+/* Bootstrap-first overrides and custom map styling for Prototype3. */
+
+body {
+  background: linear-gradient(180deg, #9cbad6 0%, #eef2f7 100%);
+}
+
+.card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+#recordingCountdown {
+  font-size: 0.875rem;
+}
+
+#statusMessage {
+  font-size: 0.95rem;
+}
+
+#predictBtn:disabled {
+  border-color: #cbd5e1;
+  background: #cbd5e1;
+  color: #64748b;
+}
+
+#predictBtn:not(:disabled) {
+  border-color: #0d6efd;
+  background: #0d6efd;
+  color: #ffffff;
+}
+
+#probList {
+  margin-top: 0.5rem;
+}
+
+#probList li {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.map-box {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.province-card {
+  padding: 1.2rem 0.8rem;
+  border: 2px solid #dbe3ee;
+  border-radius: 0.9rem;
+  text-align: center;
+  font-weight: 600;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.province-card.active {
+  border-color: #0d6efd;
+  background: #e7f1ff;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 575.98px) {
+  .province-card {
+    padding: 1rem 0.6rem;
+  }
+}
+
+.map-box {
+  width: 100%;
+  height: 420px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
