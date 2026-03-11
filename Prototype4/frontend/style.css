@@ -301,3 +301,49 @@ button:disabled {
     min-height: 180px;
   }
 }
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#predictionHistoryList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+#feedbackSection,
+#feedbackPlaceholder {
+  flex: 1 1 auto;
+}
+
+#probList {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+@media (min-width: 992px) {
+  .app-main > section {
+    min-height: 0;
+  }
+
+  .app-main .row {
+    min-height: 0;
+  }
+
+  .app-main .row > div {
+    min-height: 0;
+  }
+
+  .app-main .card {
+    min-height: 0;
+  }
+
+  #map {
+    min-height: 0;
+  }
+}

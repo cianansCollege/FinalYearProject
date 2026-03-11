@@ -5,6 +5,7 @@ import { predictAudio } from "./api.js";
 import {
   renderPrediction,
   renderError,
+  renderPredictionHistory,
   savePrediction,
   updatePredictionFeedback,
 } from "./predictions.js";
@@ -117,6 +118,7 @@ export function initRecording() {
 
   setCountdownDefault();
   refreshPredictButtonState();
+  renderPredictionHistory();
 
   recordBtn.addEventListener("click", async () => {
     try {
@@ -251,8 +253,8 @@ export function initRecording() {
       );
 
       savePrediction(result);
-      console.log("Prediction saved:", store.predictions);
       renderPrediction(result);
+      renderPredictionHistory();
 
       const predictedLabel = result.label ?? result.predicted_label ?? null;
       if (predictedLabel) {
@@ -285,6 +287,8 @@ export function initRecording() {
       if (feedbackMessage) {
         feedbackMessage.textContent = "Thanks — marked as correct.";
       }
+
+      renderPredictionHistory();
     });
   }
 
@@ -324,6 +328,8 @@ export function initRecording() {
         feedbackMessage.textContent =
           `Saved — marked incorrect, correct province: ${correctedLabel}.`;
       }
+
+      renderPredictionHistory();
     });
   }
 }
