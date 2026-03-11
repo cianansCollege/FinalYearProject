@@ -1,17 +1,63 @@
-/* Bootstrap-first overrides and custom map styling for Prototype3. */
+/* Bootstrap-first overrides and dashboard layout styling for Prototype4. */
 
 body {
+  min-height: 100vh;
   background: linear-gradient(180deg, #9cbad6 0%, #eef2f7 100%);
 }
 
+body > .container-fluid {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  flex: 0 0 auto;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0px;
+  border: 2px solid #c7d3e0;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(36, 55, 89, 0.06);
+}
+
+main.row {
+  flex: 1 1 auto;
+  align-items: stretch;
+  min-height: 0;
+}
+
+main.row > section {
+  display: flex;
+  min-height: 0;
+}
+
 .card {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  width: 100%;
+  height: 100%;
+  border-radius: 0px;
+  border: 2px solid #c7d3e0;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(36, 55, 89, 0.06);
 }
 
 .card-body {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+h1 {
+  color: #16324f;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+header p {
+  color: #486581;
+  margin-bottom: 0;
 }
 
 button:disabled {
@@ -48,37 +94,49 @@ button:disabled {
 }
 
 .map-box {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-.province-card {
-  padding: 1.2rem 0.8rem;
-  border: 2px solid #dbe3ee;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
   border-radius: 0.9rem;
-  text-align: center;
-  font-weight: 600;
-  background: #f8fafc;
-  transition: all 0.2s ease;
+  overflow: hidden;
+  border: 1px solid #d8e2ee;
+  background: #f8fbff;
 }
 
-.province-card.active {
-  border-color: #0d6efd;
-  background: #e7f1ff;
-  transform: translateY(-1px);
-}
+@media (min-width: 992px) {
+  body,
+  body > .container-fluid {
+    height: 100vh;
+    overflow: hidden;
+  }
 
-@media (max-width: 575.98px) {
-  .province-card {
-    padding: 1rem 0.6rem;
+  main.row {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  main.row > section {
+    min-height: 0;
+  }
+
+  main.row > section .card {
+    min-height: 100%;
+  }
+
+  .map-box {
+    min-height: 0;
   }
 }
 
-.map-box {
-  width: 100%;
-  height: 420px;
-  border-radius: 0.75rem;
-  overflow: hidden;
+@media (max-width: 991.98px) {
+  body,
+  body > .container-fluid {
+    min-height: auto;
+    height: auto;
+  }
+
+  .map-box {
+    min-height: 420px;
+  }
 }

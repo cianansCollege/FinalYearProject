@@ -19,16 +19,16 @@
   />
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="bg-body-tertiary">
-  <div class="container py-4 py-lg-5">
-    <header class="mb-4">
+<body>
+  <div class="container-fluid px-4 pt-1 pb-3">
+    <header class="mb-1">
       <h1 class="h2 mb-2">Prototype3 - Plug-and-Play Accent Mapper</h1>
       <p class="text-body-secondary mb-0">
         Select a model, record audio, upload audio, and view the prediction.
       </p>
     </header>
 
-    <main class="row g-4">
+    <main class="row g-1">
       <section class="col-12 col-lg-4">
         <div class="card shadow-sm h-100 border-0">
           <div class="card-body">
@@ -89,12 +89,14 @@
       <section class="col-12 col-lg-4">
         <div class="card shadow-sm h-100 border-0">
           <div class="card-body">
-            <h2 class="h5 card-title">Map</h2>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h5 card-title mb-0">Map</h2>
+              <button id="resetMapBtn" class="btn btn-sm btn-outline-secondary" type="button">
+                Reset View
+              </button>
+            </div>
             <div id="map" class="map-box"></div>
           </div>
-          <button id="resetMapBtn" class="btn btn-sm btn-outline-secondary" type="button">
-            Reset View
-          </button>
         </div>
       </section>
     </main>

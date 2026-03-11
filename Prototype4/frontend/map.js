@@ -21,7 +21,7 @@ const highlightStyle = {
 
 
 const INITIAL_CENTER = [53.4, -8.2];
-const INITIAL_ZOOM = 6;
+const INITIAL_ZOOM = 7;
 
 export async function initMap() {
   map = L.map("map").setView(INITIAL_CENTER, INITIAL_ZOOM);
