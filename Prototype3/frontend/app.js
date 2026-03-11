@@ -3,6 +3,7 @@
 import { fetchModels } from "./api.js";
 import { store } from "./store.js";
 import { initRecording } from "./recording.js";
+import { initMap } from "./map.js";
 
 function setStatus(message) {
   document.getElementById("statusMessage").textContent = message;
@@ -63,6 +64,7 @@ async function initModels() {
 }
 
 async function initApp() {
+  initMap();
   initRecording();
   await initModels();
 }
