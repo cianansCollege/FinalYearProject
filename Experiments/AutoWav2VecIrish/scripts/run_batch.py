@@ -1,9 +1,12 @@
-from pathlib import Path
+from __future__ import annotations
+
 import json
+from pathlib import Path
+
 import pandas as pd
 
 from model_defs import MODELS, get_model
-from pipeline_utils import (
+from pipeline_utils_wav2vec import (
     build_feature_matrix,
     load_metadata,
     run_cv_experiment,
@@ -12,8 +15,8 @@ from pipeline_utils import (
 from task_defs import TASKS, get_task
 
 
-BASE_DIR = Path("/Users/cianan/Documents/College/GitHub/FYP/Experiments/AutoGlobalModels_cleaned")
-CSV_PATH = Path("/Users/cianan/Documents/College/GitHub/FYP/Data/CommonVoice/training_global_cleaned_with_ni.csv")
+BASE_DIR = Path("/Users/cianan/Documents/College/GitHub/FYP/Experiments/AutoWav2VecIrish")
+CSV_PATH = Path("/Users/cianan/Documents/College/GitHub/FYP/Data/Dail_NI_Metadata/training_minimal_clean.csv")
 
 RESULTS_DIR = BASE_DIR / "results"
 LOGS_DIR = BASE_DIR / "logs"
@@ -22,44 +25,48 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def save_json(path: Path, data: dict) -> None:
+def save_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump(payload, f, indent=2)
 
 
 def main() -> None:
     print("Loading metadata...")
-    df = load_metadata(str(CSV_PATH))
-    print(f"Loaded {len(df)} rows from {CSV_PATH}")
+    metadata_df = load_metadata(str(CSV_PATH))
+    print(f"Loaded {len(metadata_df)} rows from {CSV_PATH}")
 
     all_results: list[dict] = []
     failures: list[dict] = []
 
-    for task_name in TASKS:
-        print(f"\n### TASK: {task_name} ###")
+    for task_name in TASKS.keys():
+        print(f"\n### Preparing task={task_name} ###")
 
         try:
             task_fn = get_task(task_name)
-            X_df, y = task_fn(df)
+            X_df, y = task_fn(metadata_df)
 
             if len(X_df) == 0:
                 raise ValueError(f"No rows returned for task '{task_name}'")
 
             speakers = X_df["speaker"].to_numpy()
-            class_counts = pd.Series(y).value_counts().to_dict()
 
-            print(f"Samples: {len(X_df)}")
-            print(f"Speakers: {X_df['speaker'].nunique()}")
-            print(f"Classes: {len(set(y))}")
+            class_counts = pd.Series(y).value_counts().to_dict()
+            n_classes = len(pd.Series(y).unique())
+            n_samples = len(X_df)
+            n_speakers = X_df["speaker"].nunique()
+
+            print(f"Samples: {n_samples}")
+            print(f"Speakers: {n_speakers}")
+            print(f"Classes: {n_classes}")
             print(f"Class counts: {class_counts}")
-            print("Building feature matrix once for this task...")
+            print("Building wav2vec embeddings once for this task...")
 
             X = build_feature_matrix(X_df)
 
         except Exception as exc:
             print(f"FAILED TO PREP TASK {task_name}: {exc}")
-            for model_name in MODELS:
+            for model_name in MODELS.keys():
                 failures.append({
                     "task_name": task_name,
                     "model_name": model_name,
@@ -67,33 +74,40 @@ def main() -> None:
                 })
             continue
 
-        for model_name in MODELS:
-            print(f"\n=== Running task={task_name} | model={model_name} ===")
-
+        for model_name in MODELS.keys():
             try:
+                print(f"\n=== Running task={task_name} | model={model_name} ===")
                 model = get_model(model_name)
 
-                folds, le = run_cv_experiment(X, y, speakers, model)
-                summary = summarize_results(folds)
+                fold_results, label_encoder = run_cv_experiment(
+                    X=X,
+                    y=y,
+                    speakers=speakers,
+                    model=model,
+                    n_splits=5,
+                )
+
+                summary = summarize_results(fold_results)
 
                 result = {
                     "task_name": task_name,
                     "model_name": model_name,
-                    "n_samples": len(X_df),
-                    "n_speakers": X_df["speaker"].nunique(),
-                    "n_classes": len(set(y)),
+                    "n_samples": n_samples,
+                    "n_speakers": n_speakers,
+                    "n_classes": n_classes,
                     "class_counts": class_counts,
-                    "label_classes": list(le.classes_),
+                    "label_classes": label_encoder.classes_.tolist(),
                     **summary,
                 }
 
-                all_results.append(result)
+                experiment_dir = RESULTS_DIR / task_name / model_name
+                experiment_dir.mkdir(parents=True, exist_ok=True)
 
-                out_dir = RESULTS_DIR / task_name / model_name
-                out_dir.mkdir(parents=True, exist_ok=True)
-
-                pd.DataFrame(folds).to_csv(out_dir / "fold_results.csv", index=False)
-                save_json(out_dir / "summary.json", result)
+                pd.DataFrame(fold_results).to_csv(
+                    experiment_dir / "fold_results.csv",
+                    index=False,
+                )
+                save_json(experiment_dir / "summary.json", result)
 
                 print(
                     "Done:",
@@ -101,6 +115,8 @@ def main() -> None:
                     f"bal_acc={result['balanced_accuracy_mean']:.4f}",
                     f"macro_f1={result['macro_f1_mean']:.4f}",
                 )
+
+                all_results.append(result)
 
             except Exception as exc:
                 print(f"FAILED: task={task_name} model={model_name} error={exc}")
@@ -116,15 +132,13 @@ def main() -> None:
             by=["task_name", "balanced_accuracy_mean", "macro_f1_mean"],
             ascending=[True, False, False],
         )
-        summary_df.to_csv(
-            RESULTS_DIR / "global_model_summary_cleaned_with_ni.csv",
-            index=False,
-        )
-        print(f"\nSaved summary CSV to {RESULTS_DIR / 'global_model_summary_cleaned_with_ni.csv'}")
+
+        summary_path = RESULTS_DIR / "wav2vec_irish_summary.csv"
+        summary_df.to_csv(summary_path, index=False)
+        print(f"\nSaved summary CSV to {summary_path}")
 
     if failures:
-        failure_df = pd.DataFrame(failures)
-        failure_df.to_csv(LOGS_DIR / "failures.csv", index=False)
+        pd.DataFrame(failures).to_csv(LOGS_DIR / "failures.csv", index=False)
         print(f"Saved failures log to {LOGS_DIR / 'failures.csv'}")
 
     print("\nBatch complete.")

@@ -1,234 +1,151 @@
-cianan@Cianans-MacBook-Pro AutoGlobalModels % /Users/cianan/PythonVenvs/fyp_env_py313/bin/python /Users/cianan/Documents/College/GitHub/FYP/Experiments/AutoGlobalModels/scripts/run_batch.py
+(fyp_env_py313) cianan@Cianans-MacBook-Pro AutoGlobalModels_cleaned % /Users/cianan/PythonVenvs/fyp_env_py313/bin/python /Users/cianan/Documents/College/GitHub/FYP/Experiments/AutoGlobalModels_cleaned/scripts/r
+un_batch.py
 Loading metadata...
-Loaded 20000 rows from /Users/cianan/Documents/College/GitHub/FYP/Data/CommonVoice/training_global_clean.csv
+Loaded 20000 rows from /Users/cianan/Documents/College/GitHub/FYP/Data/CommonVoice/training_global_cleaned_with_ni.csv
 
-### Preparing task=ireland_vs_rest ###
-Samples: 20000
-Speakers: 4048
+### TASK: roi_vs_ni ###
+Samples: 5000
+Speakers: 190
 Classes: 2
-Class counts: {'Rest': 15000, 'Ireland': 5000}
+Class counts: {'Northern Ireland': 2617, 'Ireland': 2383}
 Building feature matrix once for this task...
 
-=== Running task=ireland_vs_rest | model=logreg ===
-Done: acc=0.7394 bal_acc=0.5032 macro_f1=0.4657
+=== Running task=roi_vs_ni | model=logreg ===
+Done: acc=0.7929 bal_acc=0.4834 macro_f1=0.4170
 
-=== Running task=ireland_vs_rest | model=logreg_weighted ===
-Done: acc=0.6959 bal_acc=0.5421 macro_f1=0.5388
+=== Running task=roi_vs_ni | model=logreg_weighted ===
+Done: acc=0.7975 bal_acc=0.4856 macro_f1=0.4182
 
-=== Running task=ireland_vs_rest | model=rf ===
-Done: acc=0.7720 bal_acc=0.4992 macro_f1=0.4338
+=== Running task=roi_vs_ni | model=svm_linear ===
+Done: acc=0.7938 bal_acc=0.4839 macro_f1=0.4172
 
-=== Running task=ireland_vs_rest | model=knn_k5 ===
-Done: acc=0.6933 bal_acc=0.5063 macro_f1=0.4807
+=== Running task=roi_vs_ni | model=svm_rbf ===
+Done: acc=0.8167 bal_acc=0.4954 macro_f1=0.4232
 
-=== Running task=ireland_vs_rest | model=svm_rbf ===
-Done: acc=0.7661 bal_acc=0.4985 macro_f1=0.4387
+=== Running task=roi_vs_ni | model=rf ===
+Done: acc=0.8163 bal_acc=0.4952 macro_f1=0.4231
 
-=== Running task=ireland_vs_rest | model=svm_linear ===
-Done: acc=0.7462 bal_acc=0.5028 macro_f1=0.4599
+=== Running task=roi_vs_ni | model=knn_k5 ===
+Done: acc=0.5733 bal_acc=0.5720 macro_f1=0.3547
 
-=== Running task=ireland_vs_rest | model=nb ===
-Done: acc=0.6391 bal_acc=0.5140 macro_f1=0.4834
+=== Running task=roi_vs_ni | model=nb ===
+Done: acc=0.8584 bal_acc=0.5629 macro_f1=0.4961
 
-### Preparing task=uk_vs_ireland ###
+### TASK: roi_vs_uk ###
+Samples: 7383
+Speakers: 1335
+Classes: 2
+Class counts: {'UK': 5000, 'Ireland': 2383}
+Building feature matrix once for this task...
+
+=== Running task=roi_vs_uk | model=logreg ===
+Done: acc=0.6325 bal_acc=0.5230 macro_f1=0.5113
+
+=== Running task=roi_vs_uk | model=logreg_weighted ===
+Done: acc=0.5598 bal_acc=0.5205 macro_f1=0.5159
+
+=== Running task=roi_vs_uk | model=svm_linear ===
+Done: acc=0.6346 bal_acc=0.5168 macro_f1=0.4984
+
+=== Running task=roi_vs_uk | model=svm_rbf ===
+Done: acc=0.6734 bal_acc=0.5393 macro_f1=0.5053
+
+=== Running task=roi_vs_uk | model=rf ===
+Done: acc=0.6603 bal_acc=0.4942 macro_f1=0.4195
+
+=== Running task=roi_vs_uk | model=knn_k5 ===
+Done: acc=0.6324 bal_acc=0.5431 macro_f1=0.5365
+
+=== Running task=roi_vs_uk | model=nb ===
+Done: acc=0.6147 bal_acc=0.5120 macro_f1=0.4989
+
+### TASK: ni_vs_uk ###
+Samples: 7617
+Speakers: 1157
+Classes: 2
+Class counts: {'UK': 5000, 'Northern Ireland': 2617}
+Building feature matrix once for this task...
+
+=== Running task=ni_vs_uk | model=logreg ===
+Done: acc=0.8376 bal_acc=0.4921 macro_f1=0.4389
+
+=== Running task=ni_vs_uk | model=logreg_weighted ===
+Done: acc=0.8316 bal_acc=0.5378 macro_f1=0.4423
+
+=== Running task=ni_vs_uk | model=svm_linear ===
+Done: acc=0.8364 bal_acc=0.4911 macro_f1=0.4385
+
+=== Running task=ni_vs_uk | model=svm_rbf ===
+Done: acc=0.8445 bal_acc=0.4957 macro_f1=0.4407
+
+=== Running task=ni_vs_uk | model=rf ===
+Done: acc=0.8507 bal_acc=0.4988 macro_f1=0.4422
+
+=== Running task=ni_vs_uk | model=knn_k5 ===
+Done: acc=0.6766 bal_acc=0.5113 macro_f1=0.3949
+
+=== Running task=ni_vs_uk | model=nb ===
+Done: acc=0.8614 bal_acc=0.5569 macro_f1=0.4884
+
+### TASK: roi_ni_uk_3way ###
 Samples: 10000
 Speakers: 1341
-Classes: 2
-Class counts: {'Ireland': 5000, 'UK': 5000}
+Classes: 3
+Class counts: {'UK': 5000, 'Northern Ireland': 2617, 'Ireland': 2383}
 Building feature matrix once for this task...
 
-=== Running task=uk_vs_ireland | model=logreg ===
-Done: acc=0.5223 bal_acc=0.5026 macro_f1=0.4660
+=== Running task=roi_ni_uk_3way | model=logreg ===
+Done: acc=0.5442 bal_acc=0.3522 macro_f1=0.3168
 
-=== Running task=uk_vs_ireland | model=logreg_weighted ===
-Done: acc=0.5520 bal_acc=0.5119 macro_f1=0.4900
+=== Running task=roi_ni_uk_3way | model=logreg_weighted ===
+Done: acc=0.4834 bal_acc=0.3533 macro_f1=0.3161
 
-=== Running task=uk_vs_ireland | model=rf ===
-Done: acc=0.5418 bal_acc=0.4953 macro_f1=0.3863
+=== Running task=roi_ni_uk_3way | model=svm_linear ===
+Done: acc=0.5459 bal_acc=0.3489 macro_f1=0.3123
 
-=== Running task=uk_vs_ireland | model=knn_k5 ===
-Done: acc=0.5076 bal_acc=0.5141 macro_f1=0.4912
+=== Running task=roi_ni_uk_3way | model=svm_rbf ===
+Done: acc=0.5691 bal_acc=0.3518 macro_f1=0.3054
 
-=== Running task=uk_vs_ireland | model=svm_rbf ===
-Done: acc=0.5495 bal_acc=0.5115 macro_f1=0.4364
+=== Running task=roi_ni_uk_3way | model=rf ===
+Done: acc=0.5717 bal_acc=0.3291 macro_f1=0.2519
 
-=== Running task=uk_vs_ireland | model=svm_linear ===
-Done: acc=0.5260 bal_acc=0.5023 macro_f1=0.4592
+=== Running task=roi_ni_uk_3way | model=knn_k5 ===
+Done: acc=0.4259 bal_acc=0.4006 macro_f1=0.2901
 
-=== Running task=uk_vs_ireland | model=nb ===
-Done: acc=0.4899 bal_acc=0.4838 macro_f1=0.4374
+=== Running task=roi_ni_uk_3way | model=nb ===
+Done: acc=0.5411 bal_acc=0.3757 macro_f1=0.3303
 
-### Preparing task=ireland_vs_northamerican ###
-Samples: 10000
-Speakers: 2286
-Classes: 2
-Class counts: {'Ireland': 5000, 'NorthAmerican': 5000}
-Building feature matrix once for this task...
-
-=== Running task=ireland_vs_northamerican | model=logreg ===
-Done: acc=0.5403 bal_acc=0.5207 macro_f1=0.4798
-
-=== Running task=ireland_vs_northamerican | model=logreg_weighted ===
-Done: acc=0.5655 bal_acc=0.5252 macro_f1=0.5012
-
-=== Running task=ireland_vs_northamerican | model=rf ===
-Done: acc=0.5525 bal_acc=0.5037 macro_f1=0.3879
-
-=== Running task=ireland_vs_northamerican | model=knn_k5 ===
-Done: acc=0.5316 bal_acc=0.5353 macro_f1=0.4986
-
-=== Running task=ireland_vs_northamerican | model=svm_rbf ===
-Done: acc=0.5643 bal_acc=0.5224 macro_f1=0.4303
-
-=== Running task=ireland_vs_northamerican | model=svm_linear ===
-Done: acc=0.5463 bal_acc=0.5225 macro_f1=0.4742
-
-=== Running task=ireland_vs_northamerican | model=nb ===
-Done: acc=0.5186 bal_acc=0.5166 macro_f1=0.4726
-
-### Preparing task=ireland_vs_oceania ###
-Samples: 10000
-Speakers: 801
-Classes: 2
-Class counts: {'Ireland': 5000, 'Oceania': 5000}
-Building feature matrix once for this task...
-
-=== Running task=ireland_vs_oceania | model=logreg ===
-Done: acc=0.6298 bal_acc=0.5923 macro_f1=0.5794
-
-=== Running task=ireland_vs_oceania | model=logreg_weighted ===
-Done: acc=0.6538 bal_acc=0.5945 macro_f1=0.5897
-
-=== Running task=ireland_vs_oceania | model=rf ===
-Done: acc=0.6131 bal_acc=0.5526 macro_f1=0.4868
-
-=== Running task=ireland_vs_oceania | model=knn_k5 ===
-Done: acc=0.5713 bal_acc=0.5682 macro_f1=0.5524
-
-=== Running task=ireland_vs_oceania | model=svm_rbf ===
-Done: acc=0.6406 bal_acc=0.5875 macro_f1=0.5540
-
-=== Running task=ireland_vs_oceania | model=svm_linear ===
-Done: acc=0.6234 bal_acc=0.5832 macro_f1=0.5672
-
-=== Running task=ireland_vs_oceania | model=nb ===
-Done: acc=0.5816 bal_acc=0.5674 macro_f1=0.5491
-
-### Preparing task=uk_vs_rest_non_ireland ###
-Samples: 15000
-Speakers: 3858
-Classes: 2
-Class counts: {'Rest': 10000, 'UK': 5000}
-Building feature matrix once for this task...
-
-=== Running task=uk_vs_rest_non_ireland | model=logreg ===
-Done: acc=0.6465 bal_acc=0.5338 macro_f1=0.5182
-
-=== Running task=uk_vs_rest_non_ireland | model=logreg_weighted ===
-Done: acc=0.5789 bal_acc=0.5663 macro_f1=0.5562
-
-=== Running task=uk_vs_rest_non_ireland | model=rf ===
-Done: acc=0.6617 bal_acc=0.5083 macro_f1=0.4393
-
-=== Running task=uk_vs_rest_non_ireland | model=knn_k5 ===
-Done: acc=0.6122 bal_acc=0.5144 macro_f1=0.5054
-
-=== Running task=uk_vs_rest_non_ireland | model=svm_rbf ===
-Done: acc=0.6579 bal_acc=0.5240 macro_f1=0.4878
-
-=== Running task=uk_vs_rest_non_ireland | model=svm_linear ===
-Done: acc=0.6495 bal_acc=0.5079 macro_f1=0.4539
-
-=== Running task=uk_vs_rest_non_ireland | model=nb ===
-Done: acc=0.5667 bal_acc=0.5559 macro_f1=0.5451
-
-### Preparing task=northamerican_vs_oceania ###
-Samples: 10000
-Speakers: 2707
-Classes: 2
-Class counts: {'NorthAmerican': 5000, 'Oceania': 5000}
-Building feature matrix once for this task...
-
-=== Running task=northamerican_vs_oceania | model=logreg ===
-Done: acc=0.5175 bal_acc=0.5175 macro_f1=0.5129
-
-=== Running task=northamerican_vs_oceania | model=logreg_weighted ===
-Done: acc=0.5175 bal_acc=0.5175 macro_f1=0.5129
-
-=== Running task=northamerican_vs_oceania | model=rf ===
-Done: acc=0.5340 bal_acc=0.5340 macro_f1=0.5235
-
-=== Running task=northamerican_vs_oceania | model=knn_k5 ===
-Done: acc=0.5216 bal_acc=0.5216 macro_f1=0.5140
-
-=== Running task=northamerican_vs_oceania | model=svm_rbf ===
-Done: acc=0.5246 bal_acc=0.5246 macro_f1=0.5117
-
-=== Running task=northamerican_vs_oceania | model=svm_linear ===
-Done: acc=0.5134 bal_acc=0.5134 macro_f1=0.5068
-
-=== Running task=northamerican_vs_oceania | model=nb ===
-Done: acc=0.5300 bal_acc=0.5300 macro_f1=0.5063
-
-### Preparing task=four_way_global ###
+### TASK: five_way_global ###
 Samples: 20000
 Speakers: 4048
-Classes: 4
-Class counts: {'Ireland': 5000, 'NorthAmerican': 5000, 'Oceania': 5000, 'UK': 5000}
+Classes: 5
+Class counts: {'NorthAmerican': 5000, 'Oceania': 5000, 'UK': 5000, 'Northern Ireland': 2617, 'Ireland': 2383}
 Building feature matrix once for this task...
 
-=== Running task=four_way_global | model=logreg ===
-Done: acc=0.2905 bal_acc=0.2906 macro_f1=0.2777
+=== Running task=five_way_global | model=logreg ===
+Done: acc=0.3016 bal_acc=0.2398 macro_f1=0.2254
 
-=== Running task=four_way_global | model=logreg_weighted ===
-Done: acc=0.3028 bal_acc=0.2919 macro_f1=0.2855
+=== Running task=five_way_global | model=logreg_weighted ===
+Done: acc=0.2858 bal_acc=0.2468 macro_f1=0.2311
 
-=== Running task=four_way_global | model=rf ===
-Done: acc=0.2888 bal_acc=0.2822 macro_f1=0.2510
+=== Running task=five_way_global | model=svm_linear ===
+Done: acc=0.3024 bal_acc=0.2414 macro_f1=0.2254
 
-=== Running task=four_way_global | model=knn_k5 ===
-Done: acc=0.2583 bal_acc=0.2703 macro_f1=0.2502
+=== Running task=five_way_global | model=svm_rbf ===
+Done: acc=0.3144 bal_acc=0.2463 macro_f1=0.2227
 
-=== Running task=four_way_global | model=svm_rbf ===
-Done: acc=0.3041 bal_acc=0.3013 macro_f1=0.2739
+=== Running task=five_way_global | model=rf ===
+Done: acc=0.2975 bal_acc=0.2274 macro_f1=0.1970
 
-=== Running task=four_way_global | model=svm_linear ===
-Done: acc=0.2890 bal_acc=0.2896 macro_f1=0.2746
+=== Running task=five_way_global | model=knn_k5 ===
+Done: acc=0.2419 bal_acc=0.2022 macro_f1=0.1932
 
-=== Running task=four_way_global | model=nb ===
-Done: acc=0.2809 bal_acc=0.2915 macro_f1=0.2724
+=== Running task=five_way_global | model=nb ===
+Done: acc=0.2967 bal_acc=0.2507 macro_f1=0.2217
 
-### Preparing task=ireland_uk_vs_rest ###
-Samples: 20000
-Speakers: 4048
-Classes: 2
-Class counts: {'Ireland_UK': 10000, 'Rest': 10000}
-Building feature matrix once for this task...
-
-=== Running task=ireland_uk_vs_rest | model=logreg ===
-Done: acc=0.6113 bal_acc=0.6040 macro_f1=0.6011
-
-=== Running task=ireland_uk_vs_rest | model=logreg_weighted ===
-Done: acc=0.6107 bal_acc=0.6023 macro_f1=0.5989
-
-=== Running task=ireland_uk_vs_rest | model=rf ===
-Done: acc=0.5984 bal_acc=0.5856 macro_f1=0.5543
-
-=== Running task=ireland_uk_vs_rest | model=knn_k5 ===
-Done: acc=0.5701 bal_acc=0.5652 macro_f1=0.5635
-
-=== Running task=ireland_uk_vs_rest | model=svm_rbf ===
-Done: acc=0.5982 bal_acc=0.5876 macro_f1=0.5657
-
-=== Running task=ireland_uk_vs_rest | model=svm_linear ===
-Done: acc=0.6080 bal_acc=0.5995 macro_f1=0.5941
-
-=== Running task=ireland_uk_vs_rest | model=nb ===
-Done: acc=0.5896 bal_acc=0.5852 macro_f1=0.5843
-
-Saved summary CSV to /Users/cianan/Documents/College/GitHub/FYP/Experiments/AutoGlobalModels/results/global_model_summary.csv
+Saved summary CSV to /Users/cianan/Documents/College/GitHub/FYP/Experiments/AutoGlobalModels_cleaned/results/global_model_summary_cleaned_with_ni.csv
 
 Batch complete.
-Successful experiments: 56
+Successful experiments: 35
 Failed experiments: 0
-cianan@Cianans-MacBook-Pro AutoGlobalModels % 
+(fyp_env_py313) cianan@Cianans-MacBook-Pro AutoGlobalModels_cleaned % 

@@ -1,19 +1,16 @@
 """
-Defines global Common Voice experiment tasks.
+Defines cleaned global Common Voice experiment tasks.
 """
 
 import pandas as pd
 
 
 TASKS = {
-    "ireland_vs_rest": "task_ireland_vs_rest",
-    "uk_vs_ireland": "task_uk_vs_ireland",
-    "ireland_vs_northamerican": "task_ireland_vs_northamerican",
-    "ireland_vs_oceania": "task_ireland_vs_oceania",
-    "uk_vs_rest_non_ireland": "task_uk_vs_rest_non_ireland",
-    "northamerican_vs_oceania": "task_northamerican_vs_oceania",
-    "four_way_global": "task_four_way_global",
-    "ireland_uk_vs_rest": "task_ireland_uk_vs_rest",
+    "roi_vs_ni": "task_roi_vs_ni",
+    "roi_vs_uk": "task_roi_vs_uk",
+    "ni_vs_uk": "task_ni_vs_uk",
+    "roi_ni_uk_3way": "task_roi_ni_uk_3way",
+    "five_way_global": "task_five_way_global",
 }
 
 
@@ -23,53 +20,30 @@ def _basic_xy(df: pd.DataFrame, target_col: str = "label"):
     return X_df, y
 
 
-def task_ireland_vs_rest(df: pd.DataFrame):
-    keep = ["Ireland", "UK", "NorthAmerican", "Oceania"]
-    df = df[df["label"].isin(keep)].copy()
-    df["target"] = df["label"].apply(lambda x: "Ireland" if x == "Ireland" else "Rest")
-    return _basic_xy(df, "target")
-
-
-def task_uk_vs_ireland(df: pd.DataFrame):
-    df = df[df["label"].isin(["UK", "Ireland"])].copy()
+def task_roi_vs_ni(df: pd.DataFrame):
+    df = df[df["label"].isin(["Ireland", "Northern Ireland"])].copy()
     return _basic_xy(df)
 
 
-def task_ireland_vs_northamerican(df: pd.DataFrame):
-    df = df[df["label"].isin(["Ireland", "NorthAmerican"])].copy()
+def task_roi_vs_uk(df: pd.DataFrame):
+    df = df[df["label"].isin(["Ireland", "UK"])].copy()
     return _basic_xy(df)
 
 
-def task_ireland_vs_oceania(df: pd.DataFrame):
-    df = df[df["label"].isin(["Ireland", "Oceania"])].copy()
+def task_ni_vs_uk(df: pd.DataFrame):
+    df = df[df["label"].isin(["Northern Ireland", "UK"])].copy()
     return _basic_xy(df)
 
 
-def task_uk_vs_rest_non_ireland(df: pd.DataFrame):
-    keep = ["UK", "NorthAmerican", "Oceania"]
-    df = df[df["label"].isin(keep)].copy()
-    df["target"] = df["label"].apply(lambda x: "UK" if x == "UK" else "Rest")
-    return _basic_xy(df, "target")
-
-
-def task_northamerican_vs_oceania(df: pd.DataFrame):
-    df = df[df["label"].isin(["NorthAmerican", "Oceania"])].copy()
+def task_roi_ni_uk_3way(df: pd.DataFrame):
+    df = df[df["label"].isin(["Ireland", "Northern Ireland", "UK"])].copy()
     return _basic_xy(df)
 
 
-def task_four_way_global(df: pd.DataFrame):
-    keep = ["Ireland", "UK", "NorthAmerican", "Oceania"]
+def task_five_way_global(df: pd.DataFrame):
+    keep = ["Ireland", "Northern Ireland", "UK", "NorthAmerican", "Oceania"]
     df = df[df["label"].isin(keep)].copy()
     return _basic_xy(df)
-
-
-def task_ireland_uk_vs_rest(df: pd.DataFrame):
-    keep = ["Ireland", "UK", "NorthAmerican", "Oceania"]
-    df = df[df["label"].isin(keep)].copy()
-    df["target"] = df["label"].apply(
-        lambda x: "Ireland_UK" if x in ["Ireland", "UK"] else "Rest"
-    )
-    return _basic_xy(df, "target")
 
 
 def get_task(task_name: str):
