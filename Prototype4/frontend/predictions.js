@@ -1,6 +1,7 @@
 // Prediction rendering helpers for success and error states in the UI.
 
 import { store } from "./store.js";
+import { updateMap, clearMapHighlight } from "./map.js";
 
 function generatePredictionId() {
   return `pred_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -52,6 +53,7 @@ export function savePrediction(result) {
 
   store.predictions.unshift(prediction);
   store.currentPredictionId = prediction.id;
+  store.persist();
 
   return prediction;
 }
@@ -67,6 +69,8 @@ export function updatePredictionFeedback({ wasCorrect, correctedLabel = null }) 
 
   prediction.wasCorrect = wasCorrect;
   prediction.correctedLabel = correctedLabel;
+
+  store.persist();
 
   return prediction;
 }
@@ -148,6 +152,12 @@ export function renderPredictionHistory() {
 
   for (const prediction of store.predictions) {
     const item = document.createElement("div");
+    item.style.cursor = "pointer";
+
+    item.addEventListener("click", () => {
+      restorePrediction(prediction.id);
+    });
+
     item.className = "border rounded p-2 mb-2";
     item.classList.add(
       prediction.id === store.currentPredictionId
@@ -209,4 +219,31 @@ export function renderError(message) {
   if (feedbackMessage) {
     feedbackMessage.textContent = "";
   }
+}
+
+export function restorePrediction(predictionId) {
+  const prediction = store.predictions.find(
+    (p) => p.id === predictionId
+  );
+
+  if (!prediction) return;
+
+  store.currentPredictionId = predictionId;
+
+  // Restore result UI
+  renderPrediction({
+    model_id: prediction.modelId,
+    label: prediction.predictedLabel,
+    confidence: prediction.confidence,
+    probs: prediction.probabilities,
+  });
+
+  // Restore map
+  clearMapHighlight();
+  if (prediction.predictedLabel) {
+    updateMap(prediction.predictedLabel);
+  }
+
+  // Re-render history to highlight selected
+  renderPredictionHistory();
 }
