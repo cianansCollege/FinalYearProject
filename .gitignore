@@ -62,7 +62,6 @@ Data/
 Prototype1/data/
 Prototype2/data/
 *.tsv
-*.csv
 
 ############################################
 # Audio (ABSOLUTE NO-GO IN GIT)

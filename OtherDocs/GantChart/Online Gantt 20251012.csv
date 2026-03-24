@@ -1,0 +1,10 @@
+Outline Level,ID,Name,Start,Finish,Duration,% Complete,Predecessors,Resource Names,Color,Notes
+1,1,"Example",2025-10-14,2025-12-01,35 day,41,"","",,"<p><br></p>"
+2,2,"Research Phase",2025-10-14,2025-10-27,10 day,80,"","Team Member 1",121,"<p><br></p>"
+2,3,"Requirements Gathering and Design",2025-10-28,2025-11-03,5 day,50,"2FS","Team Member 2",211,"<p><br></p>"
+2,4,"Initial Implementation",2025-11-04,2025-12-01,20 day,20,"3FS","Team Member 3",301,"<p><br></p>"
+2,5,"Prototype",2025-12-01,2025-12-01,0 day,0,"4FS","Team Member 3",,"<p><br></p>"
+1,6,"Refinement and Feature Expansion",2025-12-02,2025-12-29,20 day,0,"","",,"<p><br></p>"
+1,7,"Testing and Evaluation",2026-01-06,2026-02-02,20 day,0,"","",,"<p><br></p>"
+1,8,"Final Report and Documentation",2026-02-03,2026-03-02,20 day,0,"","",,"<p><br></p>"
+1,9,"Final Submission",2026-03-03,2026-03-03,1 day,0,"","",,"<p><br></p>"

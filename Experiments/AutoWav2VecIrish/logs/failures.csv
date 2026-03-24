@@ -1,0 +1,8 @@
+task_name,model_name,error
+dail_vs_ni,logreg,Task preparation failed: No rows returned for task 'dail_vs_ni'
+dail_vs_ni,logreg_weighted,Task preparation failed: No rows returned for task 'dail_vs_ni'
+dail_vs_ni,svm_linear,Task preparation failed: No rows returned for task 'dail_vs_ni'
+dail_vs_ni,svm_rbf,Task preparation failed: No rows returned for task 'dail_vs_ni'
+dail_vs_ni,rf,Task preparation failed: No rows returned for task 'dail_vs_ni'
+dail_vs_ni,knn_k5,Task preparation failed: No rows returned for task 'dail_vs_ni'
+dail_vs_ni,nb,Task preparation failed: No rows returned for task 'dail_vs_ni'
