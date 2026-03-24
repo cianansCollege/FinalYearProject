@@ -1,15 +1,24 @@
 """
-Defines simple downstream classifiers for wav2vec embeddings.
+Defines classifiers for wav2vec embeddings.
 """
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 
 
 MODELS = {
     "logreg": "make_logreg",
     "logreg_weighted": "make_logreg_weighted",
+    "svm_linear": "make_svm_linear",
+    "svm_rbf": "make_svm_rbf",
+    "rf": "make_rf",
+    "knn_k5": "make_knn_k5",
+    "nb": "make_nb",
 }
 
 
@@ -32,6 +41,47 @@ def make_logreg_weighted():
             random_state=42,
         )),
     ])
+
+
+def make_svm_linear():
+    return Pipeline([
+        ("scaler", StandardScaler()),
+        ("clf", SVC(
+            kernel="linear",
+            probability=False,
+            random_state=42,
+        )),
+    ])
+
+
+def make_svm_rbf():
+    return Pipeline([
+        ("scaler", StandardScaler()),
+        ("clf", SVC(
+            kernel="rbf",
+            probability=False,
+            random_state=42,
+        )),
+    ])
+
+
+def make_rf():
+    return RandomForestClassifier(
+        n_estimators=200,
+        random_state=42,
+        n_jobs=-1,
+    )
+
+
+def make_knn_k5():
+    return Pipeline([
+        ("scaler", StandardScaler()),
+        ("clf", KNeighborsClassifier(n_neighbors=5)),
+    ])
+
+
+def make_nb():
+    return GaussianNB()
 
 
 def get_model(model_name: str):

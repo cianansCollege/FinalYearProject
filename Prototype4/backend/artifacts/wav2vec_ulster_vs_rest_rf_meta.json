@@ -1,0 +1,17 @@
+{
+  "task_name": "ulster_vs_rest",
+  "model_name": "rf",
+  "source_csv": "/Users/cianan/Documents/College/GitHub/FYP/Prototype3/backend/training/training_minimal_clean_01.csv",
+  "n_samples": 1618,
+  "n_speakers": 206,
+  "n_classes": 2,
+  "class_counts": {
+    "Rest": 1077,
+    "Ulster": 541
+  },
+  "label_classes": [
+    "Rest",
+    "Ulster"
+  ],
+  "feature_type": "wav2vec2-base_mean_pool"
+}

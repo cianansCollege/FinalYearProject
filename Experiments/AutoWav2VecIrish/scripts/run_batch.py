@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
-
+import sys
+import json
 import pandas as pd
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 
 from model_defs import MODELS, get_model
 from pipeline_utils_wav2vec import (
@@ -50,7 +54,6 @@ def main() -> None:
                 raise ValueError(f"No rows returned for task '{task_name}'")
 
             speakers = X_df["speaker"].to_numpy()
-
             class_counts = pd.Series(y).value_counts().to_dict()
             n_classes = len(pd.Series(y).unique())
             n_samples = len(X_df)

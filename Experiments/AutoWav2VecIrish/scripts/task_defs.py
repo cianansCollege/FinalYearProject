@@ -6,8 +6,11 @@ import pandas as pd
 
 
 TASKS = {
-    "ulster_vs_rest": "task_ulster_vs_rest",
     "province_4way": "task_province_4way",
+    "ulster_vs_rest": "task_ulster_vs_rest",
+    "leinster_vs_rest": "task_leinster_vs_rest",
+    "ulster_leinster_rest": "task_ulster_leinster_rest",
+    "dail_vs_ni": "task_dail_vs_ni",
 }
 
 
@@ -17,19 +20,41 @@ def _basic_xy(df: pd.DataFrame, target_col: str = "label"):
     return X_df, y
 
 
-def task_ulster_vs_rest(df: pd.DataFrame):
-    df = df[df["label"].isin(["Ulster", "Leinster", "Munster", "Connacht"])].copy()
-
-    df["target"] = df["label"].apply(
-        lambda x: "Ulster" if x == "Ulster" else "Rest"
-    )
-
-    return _basic_xy(df, target_col="target")
-
-
 def task_province_4way(df: pd.DataFrame):
     keep = ["Connacht", "Leinster", "Munster", "Ulster"]
     df = df[df["label"].isin(keep)].copy()
+    return _basic_xy(df)
+
+
+def task_ulster_vs_rest(df: pd.DataFrame):
+    keep = ["Connacht", "Leinster", "Munster", "Ulster"]
+    df = df[df["label"].isin(keep)].copy()
+    df["target"] = df["label"].apply(
+        lambda x: "Ulster" if x == "Ulster" else "Rest"
+    )
+    return _basic_xy(df, "target")
+
+
+def task_leinster_vs_rest(df: pd.DataFrame):
+    keep = ["Connacht", "Leinster", "Munster", "Ulster"]
+    df = df[df["label"].isin(keep)].copy()
+    df["target"] = df["label"].apply(
+        lambda x: "Leinster" if x == "Leinster" else "Rest"
+    )
+    return _basic_xy(df, "target")
+
+
+def task_ulster_leinster_rest(df: pd.DataFrame):
+    keep = ["Connacht", "Leinster", "Munster", "Ulster"]
+    df = df[df["label"].isin(keep)].copy()
+    df["target"] = df["label"].apply(
+        lambda x: x if x in ["Ulster", "Leinster"] else "Rest"
+    )
+    return _basic_xy(df, "target")
+
+
+def task_dail_vs_ni(df: pd.DataFrame):
+    df = df[df["label"].isin(["DAIL", "NI"])].copy()
     return _basic_xy(df)
 
 

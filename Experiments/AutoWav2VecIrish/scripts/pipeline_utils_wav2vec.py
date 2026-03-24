@@ -1,9 +1,11 @@
 """
 Reusable wav2vec experiment pipeline utilities.
 
+Handles:
 - metadata loading
 - wav2vec embedding extraction
-- speaker-safe CV
+- speaker-safe cross validation
+- model training
 - metric calculation
 """
 
@@ -13,11 +15,16 @@ import numpy as np
 import pandas as pd
 import librosa
 import torch
-
+from tqdm import tqdm
 from transformers import Wav2Vec2Model, Wav2Vec2Processor
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedGroupKFold
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    f1_score,
+)
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -26,6 +33,10 @@ MODEL_NAME = "facebook/wav2vec2-base"
 _processor = None
 _wav2vec_model = None
 
+
+# --------------------------------------------------
+# Model loading
+# --------------------------------------------------
 
 def get_wav2vec_components():
     global _processor, _wav2vec_model
@@ -41,6 +52,10 @@ def get_wav2vec_components():
     return _processor, _wav2vec_model
 
 
+# --------------------------------------------------
+# Metadata loading
+# --------------------------------------------------
+
 def load_metadata(csv_path: str) -> pd.DataFrame:
     df = pd.read_csv(csv_path)
 
@@ -52,6 +67,10 @@ def load_metadata(csv_path: str) -> pd.DataFrame:
 
     return df
 
+
+# --------------------------------------------------
+# Feature extraction
+# --------------------------------------------------
 
 def extract_wav2vec_embedding(filepath: str) -> np.ndarray:
     processor, model = get_wav2vec_components()
@@ -69,26 +88,31 @@ def extract_wav2vec_embedding(filepath: str) -> np.ndarray:
 
     with torch.no_grad():
         outputs = model(input_values)
-        hidden = outputs.last_hidden_state  # [1, time, hidden_dim]
-        pooled = hidden.mean(dim=1).squeeze(0)  # [hidden_dim]
+        hidden = outputs.last_hidden_state          # [1, time, hidden_dim]
+        pooled = hidden.mean(dim=1).squeeze(0)     # [hidden_dim]
 
     return pooled.cpu().numpy().astype(np.float32)
 
 
 def build_feature_matrix(X_df: pd.DataFrame) -> np.ndarray:
     features = []
-    total = len(X_df)
 
-    for i, path in enumerate(X_df["filepath"], start=1):
-        if i == 1 or i % 25 == 0 or i == total:
-            print(f"Embedding {i}/{total}: {path}")
+    for path in tqdm(X_df["filepath"], desc="Extracting wav2vec embeddings"):
         emb = extract_wav2vec_embedding(path)
         features.append(emb)
 
     return np.vstack(features)
 
 
+# --------------------------------------------------
+# Cross validation
+# --------------------------------------------------
+
 def run_cv_experiment(X, y, speakers, model, n_splits=5):
+    """
+    Run StratifiedGroupKFold cross-validation.
+    """
+
     le = LabelEncoder()
     y_encoded = le.fit_transform(y)
 
@@ -116,28 +140,39 @@ def run_cv_experiment(X, y, speakers, model, n_splits=5):
     ):
         X_train = X[train_idx]
         X_test = X[test_idx]
+
         y_train = y_encoded[train_idx]
         y_test = y_encoded[test_idx]
 
         model.fit(X_train, y_train)
         preds = model.predict(X_test)
 
+        acc = accuracy_score(y_test, preds)
+        bal_acc = balanced_accuracy_score(y_test, preds)
+        f1 = f1_score(y_test, preds, average="macro")
+
         fold_results.append({
             "fold": fold,
-            "accuracy": accuracy_score(y_test, preds),
-            "balanced_accuracy": balanced_accuracy_score(y_test, preds),
-            "macro_f1": f1_score(y_test, preds, average="macro"),
+            "accuracy": acc,
+            "balanced_accuracy": bal_acc,
+            "macro_f1": f1,
         })
 
     return fold_results, le
 
 
+# --------------------------------------------------
+# Summary metrics
+# --------------------------------------------------
+
 def summarize_results(fold_results):
     df = pd.DataFrame(fold_results)
 
-    return {
+    summary = {
         "accuracy_mean": float(df["accuracy"].mean()),
         "accuracy_std": float(df["accuracy"].std()),
         "balanced_accuracy_mean": float(df["balanced_accuracy"].mean()),
         "macro_f1_mean": float(df["macro_f1"].mean()),
     }
+
+    return summary
