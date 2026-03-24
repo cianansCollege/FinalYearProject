@@ -6,3 +6,7 @@ librosa
 scikit-learn
 joblib
 soundfile
+pandas
+sentencepiece
+torch
+transformers

@@ -7,4 +7,4 @@ from plugins.wav2vec_ulster_vs_rest_rf import Wav2VecUlsterVsRestRF
 def load_plugins() -> None:
     register(dummy_plugin)
     register(mfcc_logreg_plugin)
-    register(Wav2VecUlsterVsRestRF)
+    register(Wav2VecUlsterVsRestRF())
