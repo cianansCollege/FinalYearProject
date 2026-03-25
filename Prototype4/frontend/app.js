@@ -65,9 +65,14 @@ async function initModels() {
 }
 
 async function initApp() {
-  await initMap();
-  initRecording();
+  try {
+    await initMap();
+  } catch (error) {
+    console.error("Map failed to load:", error);
+  }
+
   await initModels();
+  initRecording();
 
   const resetMapBtn = document.getElementById("resetMapBtn");
   if (resetMapBtn) {

@@ -5,6 +5,7 @@ import { predictAudio } from "./api.js";
 import {
   renderPrediction,
   renderError,
+  renderFeedbackState,
   renderPredictionHistory,
   savePrediction,
   updatePredictionFeedback,
@@ -12,6 +13,7 @@ import {
 import { updateMap, clearMapHighlight } from "./map.js";
 
 let mediaRecorder = null;
+let mediaStream = null;
 let audioChunks = [];
 let playbackObjectUrl = null;
 let recordingStartTime = null;
@@ -122,7 +124,7 @@ export function initRecording() {
 
   recordBtn.addEventListener("click", async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       audioChunks = [];
       recordingStartTime = Date.now();
@@ -131,7 +133,7 @@ export function initRecording() {
       setPlaybackSource(null);
       startRecordingTimer();
 
-      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder = new MediaRecorder(mediaStream);
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -142,6 +144,11 @@ export function initRecording() {
       mediaRecorder.onstop = () => {
         stopRecordingTimer();
         const durationSeconds = (Date.now() - recordingStartTime) / 1000;
+
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          mediaStream = null;
+        }
 
         if (durationSeconds < MIN_RECORDING_SECONDS) {
           if (recordingCountdown) {
@@ -156,6 +163,7 @@ export function initRecording() {
           setStatus(
             `Recording too short (${durationSeconds.toFixed(1)}s). Minimum is ${MIN_RECORDING_SECONDS} seconds.`
           );
+          recordingStartTime = null;
           return;
         }
 
@@ -176,6 +184,7 @@ export function initRecording() {
         setStatus(
           `Recording ready (${durationSeconds.toFixed(1)}s). Click Predict Accent.`
         );
+        recordingStartTime = null;
       };
 
       mediaRecorder.start();
@@ -186,6 +195,11 @@ export function initRecording() {
     } catch (error) {
       console.error(error);
       stopRecordingTimer();
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        mediaStream = null;
+      }
+      recordingStartTime = null;
       setCountdownDefault();
       setStatus("Could not access microphone.");
     }
@@ -288,6 +302,7 @@ export function initRecording() {
         feedbackMessage.textContent = "Thanks — marked as correct.";
       }
 
+      renderFeedbackState(updated);
       renderPredictionHistory();
     });
   }
@@ -329,6 +344,7 @@ export function initRecording() {
           `Saved — marked incorrect, correct province: ${correctedLabel}.`;
       }
 
+      renderFeedbackState(updated);
       renderPredictionHistory();
     });
   }

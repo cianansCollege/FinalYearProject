@@ -39,6 +39,73 @@ function formatFeedbackStatus(prediction) {
   return "Feedback: Pending";
 }
 
+function setFeedbackButtonState(button, isActive) {
+  if (!button) {
+    return;
+  }
+
+  button.classList.toggle("active", isActive);
+  button.setAttribute("aria-pressed", isActive ? "true" : "false");
+}
+
+export function renderFeedbackState(prediction = null) {
+  const feedbackSection = document.getElementById("feedbackSection");
+  const feedbackPlaceholder = document.getElementById("feedbackPlaceholder");
+  const correctLabelSection = document.getElementById("correctLabelSection");
+  const feedbackMessage = document.getElementById("feedbackMessage");
+  const correctLabelSelect = document.getElementById("correctLabelSelect");
+  const feedbackYesBtn = document.getElementById("feedbackYesBtn");
+  const feedbackNoBtn = document.getElementById("feedbackNoBtn");
+
+  if (!feedbackSection || !feedbackPlaceholder) {
+    return;
+  }
+
+  feedbackSection.classList.remove("d-none");
+  feedbackPlaceholder.classList.add("d-none");
+
+  setFeedbackButtonState(feedbackYesBtn, prediction?.wasCorrect === true);
+  setFeedbackButtonState(feedbackNoBtn, prediction?.wasCorrect === false);
+
+  if (prediction?.wasCorrect === true) {
+    if (correctLabelSection) {
+      correctLabelSection.classList.add("d-none");
+    }
+    if (correctLabelSelect) {
+      correctLabelSelect.value = "";
+    }
+    if (feedbackMessage) {
+      feedbackMessage.textContent = "Saved feedback: marked as correct.";
+    }
+    return;
+  }
+
+  if (prediction?.wasCorrect === false) {
+    if (correctLabelSection) {
+      correctLabelSection.classList.remove("d-none");
+    }
+    if (correctLabelSelect) {
+      correctLabelSelect.value = prediction.correctedLabel ?? "";
+    }
+    if (feedbackMessage) {
+      feedbackMessage.textContent = prediction.correctedLabel
+        ? `Saved feedback: marked incorrect, correct province: ${prediction.correctedLabel}.`
+        : "Saved feedback: marked incorrect.";
+    }
+    return;
+  }
+
+  if (correctLabelSection) {
+    correctLabelSection.classList.add("d-none");
+  }
+  if (correctLabelSelect) {
+    correctLabelSelect.value = "";
+  }
+  if (feedbackMessage) {
+    feedbackMessage.textContent = "";
+  }
+}
+
 export function savePrediction(result) {
   const prediction = {
     id: generatePredictionId(),
@@ -104,31 +171,7 @@ export function renderPrediction(result) {
     }
   }
 
-  const feedbackSection = document.getElementById("feedbackSection");
-  const feedbackPlaceholder = document.getElementById("feedbackPlaceholder");
-  const correctLabelSection = document.getElementById("correctLabelSection");
-  const feedbackMessage = document.getElementById("feedbackMessage");
-  const correctLabelSelect = document.getElementById("correctLabelSelect");
-
-  if (feedbackSection) {
-    feedbackSection.classList.remove("d-none");
-  }
-
-  if (feedbackPlaceholder) {
-    feedbackPlaceholder.classList.add("d-none");
-  }
-
-  if (correctLabelSection) {
-    correctLabelSection.classList.add("d-none");
-  }
-
-  if (feedbackMessage) {
-    feedbackMessage.textContent = "";
-  }
-
-  if (correctLabelSelect) {
-    correctLabelSelect.value = "";
-  }
+  renderFeedbackState(result);
 }
 
 export function renderPredictionHistory() {
@@ -203,6 +246,9 @@ export function renderError(message) {
   const feedbackPlaceholder = document.getElementById("feedbackPlaceholder");
   const correctLabelSection = document.getElementById("correctLabelSection");
   const feedbackMessage = document.getElementById("feedbackMessage");
+  const correctLabelSelect = document.getElementById("correctLabelSelect");
+  const feedbackYesBtn = document.getElementById("feedbackYesBtn");
+  const feedbackNoBtn = document.getElementById("feedbackNoBtn");
 
   if (feedbackSection) {
     feedbackSection.classList.add("d-none");
@@ -219,6 +265,13 @@ export function renderError(message) {
   if (feedbackMessage) {
     feedbackMessage.textContent = "";
   }
+
+  if (correctLabelSelect) {
+    correctLabelSelect.value = "";
+  }
+
+  setFeedbackButtonState(feedbackYesBtn, false);
+  setFeedbackButtonState(feedbackNoBtn, false);
 }
 
 export function restorePrediction(predictionId) {
@@ -236,6 +289,8 @@ export function restorePrediction(predictionId) {
     label: prediction.predictedLabel,
     confidence: prediction.confidence,
     probs: prediction.probabilities,
+    wasCorrect: prediction.wasCorrect,
+    correctedLabel: prediction.correctedLabel,
   });
 
   // Restore map
