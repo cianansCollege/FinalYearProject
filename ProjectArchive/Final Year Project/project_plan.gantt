@@ -1,0 +1,13 @@
+GANTT CHART - Final Year Project (Nov 2025 - Feb 2026)
+
+Weeks: LateNov, DecW1, DecW2, DecW3, DecW4, JanW1, JanW2, JanW3, JanW4, FebW1, FebW2
+
+Dataset Expansion:            #### #### #### #### ---- ---- ---- ---- ---- ---- ----
+Model Retraining:            ---- #### #### #### #### #### #### ---- ---- ---- ----
+Wav2Vec2 Testing:            ---- ---- #### #### #### #### #### #### #### ---- ----
+PostgreSQL/PostGIS Migration:---- ---- ---- #### #### #### #### ---- ---- ---- ----
+API Enhancements:            ---- ---- ---- #### #### #### #### ---- ---- ---- ----
+Frontend Development:        ---- ---- ---- ---- ##   #### #### #### #### ---- ----
+System Integration:          ---- ---- ---- ---- ---- ---- #### #### ##   ##   ----
+Evaluation:                  ---- ---- ---- ---- ---- ---- ---- #### #### #### ####
+Final Report:                ---- ---- ---- ---- ---- ---- ---- ---- #### #### ####

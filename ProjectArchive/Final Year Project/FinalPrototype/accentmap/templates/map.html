@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Accent Map Prototype</title>
+    <link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+      #map { height: 500px; margin-top: 1rem; }
+      body { font-family: sans-serif; max-width: 900px; margin: 1rem auto; }
+      .panel { margin-bottom: 1rem; padding: 1rem; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+  <h1>Mapping the Spoken Word – Prototype</h1>
+
+  <div class="panel">
+    <h3>Upload audio for prediction</h3>
+    <form id="upload-form">
+      <input type="file" name="audio" id="audio-input" accept=".wav" required />
+      <button type="submit">Predict Accent Location</button>
+    </form>
+    <p id="status"></p>
+  </div>
+
+  <div class="panel">
+    <h3>Prediction Map</h3>
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Init map
+    var map = L.map('map').setView([53.4, -8.2], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    var markersLayer = L.layerGroup().addTo(map);
+
+    function loadPredictions() {
+      fetch("/api/predictions/")
+        .then(res => res.json())
+        .then(data => {
+          markersLayer.clearLayers();
+          data.forEach(p => {
+            L.marker([p.lat, p.lng])
+              .addTo(markersLayer)
+              .bindPopup("Prediction #" + p.id + "<br>" +
+                         "Lat: " + p.lat.toFixed(4) +
+                         "<br>Lng: " + p.lng.toFixed(4) +
+                         "<br>Confidence: " + (p.confidence ?? 0).toFixed(2));
+          });
+        })
+        .catch(err => console.error("Error loading predictions:", err));
+    }
+
+    loadPredictions();
+
+    // Handle form submission
+    document.getElementById("upload-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      var fileInput = document.getElementById("audio-input");
+      var statusEl = document.getElementById("status");
+
+      if (!fileInput.files.length) {
+        statusEl.textContent = "Please select a .wav file first.";
+        return;
+      }
+
+      var formData = new FormData();
+      formData.append("audio", fileInput.files[0]);
+
+      statusEl.textContent = "Uploading and predicting...";
+
+      fetch("/api/predict/", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          statusEl.textContent = "Error: " + data.error;
+        } else {
+          statusEl.textContent = "Prediction complete. Label: " + data.label +
+                                 " (" + data.lat.toFixed(4) + ", " +
+                                 data.lng.toFixed(4) + ")";
+          loadPredictions();
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        statusEl.textContent = "An error occurred.";
+      });
+    });
+  </script>
+</body>
+</html>
