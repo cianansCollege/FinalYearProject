@@ -13,6 +13,7 @@ import soundfile as sf
 
 
 TARGET_SR = 16000
+REQUIRED_CLIP_SECONDS = 10
 
 
 def _guess_audio_suffix(audio_bytes: bytes) -> str:
@@ -125,5 +126,13 @@ def load_audio_from_bytes(
     if sr != target_sr:
         waveform = librosa.resample(waveform, orig_sr=sr, target_sr=target_sr)
         sr = target_sr
+
+    required_samples = int(target_sr * REQUIRED_CLIP_SECONDS)
+    if waveform.size < required_samples:
+        raise ValueError(
+            f"Audio must be at least {REQUIRED_CLIP_SECONDS} seconds long."
+        )
+
+    waveform = np.ascontiguousarray(waveform[:required_samples], dtype=np.float32)
 
     return waveform, sr

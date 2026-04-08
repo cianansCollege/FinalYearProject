@@ -1,9 +1,8 @@
-import io
-
-import librosa
 import numpy as np
 import torch
 from transformers import Wav2Vec2Processor, Wav2Vec2Model
+
+from services.audio import load_audio_from_bytes
 
 MODEL_NAME = "facebook/wav2vec2-base"
 
@@ -24,7 +23,7 @@ def _load_model():
 def audio_bytes_to_embedding(audio_bytes: bytes) -> np.ndarray:
     _load_model()
 
-    waveform, _sr = librosa.load(io.BytesIO(audio_bytes), sr=16000, mono=True)
+    waveform, _sr = load_audio_from_bytes(audio_bytes)
 
     inputs = _processor(waveform, sampling_rate=16000, return_tensors="pt")
 
