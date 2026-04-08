@@ -1,11 +1,12 @@
-# Prototype4: Plug-and-Play Accent Mapper
+# Prototype4: Mapping the Spoken Word
 
-Prototype4 is a full-stack prototype for Irish accent/province prediction from audio.
-It includes:
+Prototype4 is a full-stack prototype for Irish accent analysis from audio.
+It currently includes:
 
-- A FastAPI backend with plugin-based models
-- A browser frontend for recording/uploading audio and viewing results
-- Map highlighting, prediction history, and user feedback capture
+- A FastAPI backend with plugin-based model loading
+- A browser frontend for recording or uploading audio and viewing results
+- Province map highlighting, prediction history, and feedback capture
+- Multiple inference plugins, including MFCC-based province classification and a wav2vec-based Ulster detector
 
 ## Project Structure
 
@@ -18,10 +19,13 @@ Prototype4/
     plugins/
       dummy_model.py         # Deterministic test model
       mfcc_logreg_v1_01.py   # MFCC + Logistic Regression model plugin
+      wav2vec_ulster_vs_rest_rf.py  # Wav2Vec + Random Forest plugin
     services/
       audio.py               # Audio decode/normalize/resample helpers
       features.py            # MFCC feature extraction
+      wav2vec_features.py    # Wav2Vec embedding extraction
     artifacts/               # Trained model artifacts (.joblib)
+    training/                # Training scripts used to build deployable artifacts
     requirements.txt
   frontend/
     index.html
@@ -32,6 +36,7 @@ Prototype4/
     map.js
     store.js
     style.css
+    styleLightmode.css
     data/provinces.geojson
   testing/
     SystemTests.xlsx
@@ -39,9 +44,10 @@ Prototype4/
 
 ## Requirements
 
-- Python 3.10+ (3.11/3.12 recommended)
+- Python 3.10+ (3.11+ recommended)
 - `pip`
 - `ffmpeg` recommended (used as robust fallback for audio conversion)
+- Internet access may be needed on the first wav2vec inference run if the Hugging Face model is not already cached
 
 ## Quick Start
 
@@ -77,6 +83,11 @@ uvicorn app:app --reload
 - Models: [http://127.0.0.1:8000/api/models](http://127.0.0.1:8000/api/models)
 - API Docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
+Notes:
+
+- The frontend title is `Mapping the Spoken Word`.
+- The first wav2vec prediction can take longer than later requests because the base encoder may need to load and cache.
+
 ## How to Use the UI
 
 1. Select a model from the dropdown.
@@ -87,9 +98,11 @@ uvicorn app:app --reload
    - Class probability breakdown
    - Map highlight
    - Prediction history
+   - Restored history entries when you click an earlier prediction
 5. Provide feedback:
    - `Yes` if correct
    - `No` and choose the correct province if incorrect
+6. Use `Reset View` to return the map to its default position.
 
 ## API Endpoints
 
@@ -118,6 +131,16 @@ Example response:
       "id": "dummy_v1",
       "name": "Dummy Model (v1)",
       "description": "Test model for end-to-end frontend/backend integration."
+    },
+    {
+      "id": "mfcc_logreg_v1_01",
+      "name": "MFCC + Logistic Regression (v1)",
+      "description": "MFCC summary features with a Logistic Regression classifier."
+    },
+    {
+      "id": "wav2vec_ulster_vs_rest_rf",
+      "name": "Ulster Detection (Wav2Vec)",
+      "description": "Detects whether the speaker is from Ulster."
     }
   ]
 }
@@ -152,14 +175,16 @@ Registration happens in `backend/plugin_loader.py`, and runtime lookup happens t
 
 Current plugins:
 
-- `dummy_v1`: deterministic output based on audio byte length (for integration testing)
-- `mfcc_logreg_v1_01`: real model using MFCC summary features + logistic regression
+- `dummy_v1`: deterministic output based on audio byte length for integration testing
+- `mfcc_logreg_v1_01`: four-way province classification using MFCC summary features + logistic regression
+- `wav2vec_ulster_vs_rest_rf`: binary Ulster-vs-rest classification using Wav2Vec2 embeddings + random forest
 
 ## Data + State Notes
 
-- Frontend state is in `frontend/store.js`.
-- Prediction history and feedback are currently client-side only (in-memory).
-- State resets on full page reload.
+- Frontend state is managed in `frontend/store.js`.
+- Prediction history and feedback are persisted in browser `localStorage` under `fyp_predictions`.
+- Current audio buffers and the currently selected history item are session-only and reset on full reload.
+- Clicking a prediction in history restores its result details, map highlight, and saved feedback state.
 
 ## Troubleshooting
 
@@ -168,16 +193,23 @@ Current plugins:
 - `Failed to load models`:
   - Confirm backend is running on `127.0.0.1:8000`
   - Check terminal logs for plugin load errors
+- Wav2Vec model is slow or fails on first use:
+  - Confirm `torch`, `transformers`, and `sentencepiece` were installed from `requirements.txt`
+  - Ensure internet access is available if the Hugging Face model has not been cached yet
 - `Unsupported or unreadable audio format`:
   - Install `ffmpeg` and retry
   - Try `.wav` input to isolate format issues
 - Microphone recording fails:
   - Ensure browser microphone permission is granted
+- Map fails to load:
+  - The rest of the app can still work without the map
+  - Check whether `/static/data/provinces.geojson` is being served correctly
 - `ModuleNotFoundError` during startup:
   - Activate virtualenv and reinstall `requirements.txt`
 
 ## Development Notes
 
 - Frontend assets are served by FastAPI from `/static`.
+- The active UI stylesheet is `frontend/style.css`; `frontend/styleLightmode.css` is an alternate light-theme prototype stylesheet.
 - No separate frontend build step is required.
 - `testing/SystemTests.xlsx` contains manual/system test tracking.

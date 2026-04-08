@@ -18,8 +18,9 @@ let audioChunks = [];
 let playbackObjectUrl = null;
 let recordingStartTime = null;
 let recordingTimerId = null;
+let recordingAutoStopId = null;
 
-const MIN_RECORDING_SECONDS = 10;
+const RECORDING_LENGTH_SECONDS = 10;
 
 function setStatus(message) {
   document.getElementById("statusMessage").textContent = message;
@@ -75,12 +76,19 @@ export function initRecording() {
     }
   }
 
+  function stopAutoStopTimer() {
+    if (recordingAutoStopId) {
+      clearTimeout(recordingAutoStopId);
+      recordingAutoStopId = null;
+    }
+  }
+
   function setCountdownDefault() {
     if (!recordingCountdown) {
       return;
     }
 
-    recordingCountdown.textContent = `Minimum ${MIN_RECORDING_SECONDS} seconds`;
+    recordingCountdown.textContent = `Recording length: ${RECORDING_LENGTH_SECONDS} seconds`;
     recordingCountdown.classList.remove("text-danger", "text-success");
     recordingCountdown.classList.add("text-body-secondary");
   }
@@ -90,18 +98,18 @@ export function initRecording() {
       return;
     }
 
-    const remainingSeconds = Math.max(0, MIN_RECORDING_SECONDS - elapsedSeconds);
+    const remainingSeconds = Math.max(0, RECORDING_LENGTH_SECONDS - elapsedSeconds);
 
     if (remainingSeconds > 0) {
       recordingCountdown.textContent =
-        `Minimum ${MIN_RECORDING_SECONDS}s: ${remainingSeconds.toFixed(1)}s remaining`;
+        `Recording: ${remainingSeconds.toFixed(1)}s remaining`;
       recordingCountdown.classList.remove("text-danger", "text-success");
       recordingCountdown.classList.add("text-body-secondary");
       return;
     }
 
     recordingCountdown.textContent =
-      `Minimum ${MIN_RECORDING_SECONDS}s reached. You can stop recording.`;
+      `Recording complete. Stopping automatically...`;
     recordingCountdown.classList.remove("text-danger", "text-body-secondary");
     recordingCountdown.classList.add("text-success");
   }
@@ -118,6 +126,17 @@ export function initRecording() {
     }, 100);
   }
 
+  function startAutoStopTimer() {
+    stopAutoStopTimer();
+    recordingAutoStopId = setTimeout(() => {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        recordBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    }, RECORDING_LENGTH_SECONDS * 1000);
+  }
+
   setCountdownDefault();
   refreshPredictButtonState();
   renderPredictionHistory();
@@ -131,7 +150,6 @@ export function initRecording() {
       store.latestAudioBlob = null;
       store.uploadedAudioFile = null;
       setPlaybackSource(null);
-      startRecordingTimer();
 
       mediaRecorder = new MediaRecorder(mediaStream);
 
@@ -143,6 +161,7 @@ export function initRecording() {
 
       mediaRecorder.onstop = () => {
         stopRecordingTimer();
+        stopAutoStopTimer();
         const durationSeconds = (Date.now() - recordingStartTime) / 1000;
 
         if (mediaStream) {
@@ -150,10 +169,10 @@ export function initRecording() {
           mediaStream = null;
         }
 
-        if (durationSeconds < MIN_RECORDING_SECONDS) {
+        if (durationSeconds + 0.05 < RECORDING_LENGTH_SECONDS) {
           if (recordingCountdown) {
             recordingCountdown.textContent =
-              `Too short: ${durationSeconds.toFixed(1)}s recorded. Minimum is ${MIN_RECORDING_SECONDS}s.`;
+              `Recording cancelled at ${durationSeconds.toFixed(1)}s. A full ${RECORDING_LENGTH_SECONDS}s clip is required.`;
             recordingCountdown.classList.remove("text-success", "text-body-secondary");
             recordingCountdown.classList.add("text-danger");
           }
@@ -161,7 +180,7 @@ export function initRecording() {
           setPlaybackSource(null);
           refreshPredictButtonState();
           setStatus(
-            `Recording too short (${durationSeconds.toFixed(1)}s). Minimum is ${MIN_RECORDING_SECONDS} seconds.`
+            `Recording stopped early (${durationSeconds.toFixed(1)}s). Please record the full ${RECORDING_LENGTH_SECONDS} seconds.`
           );
           recordingStartTime = null;
           return;
@@ -169,7 +188,7 @@ export function initRecording() {
 
         if (recordingCountdown) {
           recordingCountdown.textContent =
-            `Recorded ${durationSeconds.toFixed(1)}s. Minimum met.`;
+            `Recorded ${durationSeconds.toFixed(1)}s clip.`;
           recordingCountdown.classList.remove("text-danger", "text-body-secondary");
           recordingCountdown.classList.add("text-success");
         }
@@ -188,13 +207,16 @@ export function initRecording() {
       };
 
       mediaRecorder.start();
+      startRecordingTimer();
+      startAutoStopTimer();
       recordBtn.disabled = true;
       stopBtn.disabled = false;
       refreshPredictButtonState();
-      setStatus(`Recording... minimum length is ${MIN_RECORDING_SECONDS} seconds.`);
+      setStatus(`Recording... the clip will stop automatically after ${RECORDING_LENGTH_SECONDS} seconds.`);
     } catch (error) {
       console.error(error);
       stopRecordingTimer();
+      stopAutoStopTimer();
       if (mediaStream) {
         mediaStream.getTracks().forEach((track) => track.stop());
         mediaStream = null;
@@ -210,6 +232,7 @@ export function initRecording() {
       mediaRecorder.stop();
     }
 
+    stopAutoStopTimer();
     recordBtn.disabled = false;
     stopBtn.disabled = true;
   });
