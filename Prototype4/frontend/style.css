@@ -347,3 +347,15 @@ button:disabled {
     min-height: 0;
   }
 }
+
+#resultLabel {
+  color: #c7d2de;
+}
+
+#resultModel{
+  color: #c7d2de;
+}
+
+#resultConfidence{
+  color: #c7d2de;
+}
