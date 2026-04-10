@@ -225,6 +225,8 @@ export function initRecording() {
         const recordedMimeType =
           mediaRecorder.mimeType || audioChunks[0]?.type || "audio/webm";
         const audioBlob = new Blob(audioChunks, { type: recordedMimeType });
+        console.log("Recorded blob type:", audioBlob.type);
+        console.log("Recorded blob size:", audioBlob.size);
 
         store.latestAudioBlob = audioBlob;
         store.uploadedAudioFile = null;
