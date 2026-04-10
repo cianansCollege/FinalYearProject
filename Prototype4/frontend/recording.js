@@ -1,7 +1,7 @@
 // Microphone capture flow and predict-button wiring for the frontend.
 
-import { store } from "./store.js";
-import { predictAudio } from "./api.js";
+import { store } from "./store.js?v=20260409";
+import { predictAudio } from "./api.js?v=20260409";
 import {
   renderPrediction,
   renderError,
@@ -9,8 +9,8 @@ import {
   renderPredictionHistory,
   savePrediction,
   updatePredictionFeedback,
-} from "./predictions.js";
-import { updateMap, clearMapHighlight } from "./map.js";
+} from "./predictions.js?v=20260409";
+import { updateMap, clearMapHighlight } from "./map.js?v=20260409";
 
 let mediaRecorder = null;
 let mediaStream = null;
@@ -20,7 +20,15 @@ let recordingStartTime = null;
 let recordingTimerId = null;
 let recordingAutoStopId = null;
 
-const RECORDING_LENGTH_SECONDS = 10;
+const REQUIRED_CLIP_SECONDS = 10;
+const RECORDING_COUNTDOWN_SECONDS = 11;
+const RECORDING_MIME_CANDIDATES = [
+  "audio/webm;codecs=opus",
+  "audio/webm",
+  "audio/mp4",
+  "audio/ogg;codecs=opus",
+  "audio/ogg",
+];
 
 function setStatus(message) {
   document.getElementById("statusMessage").textContent = message;
@@ -69,6 +77,23 @@ export function initRecording() {
     predictBtn.disabled = !hasAudioSource;
   }
 
+  function getRecorderOptions() {
+    if (typeof MediaRecorder === "undefined") {
+      return undefined;
+    }
+
+    for (const mimeType of RECORDING_MIME_CANDIDATES) {
+      if (typeof MediaRecorder.isTypeSupported !== "function") {
+        break;
+      }
+      if (MediaRecorder.isTypeSupported(mimeType)) {
+        return { mimeType };
+      }
+    }
+
+    return undefined;
+  }
+
   function stopRecordingTimer() {
     if (recordingTimerId) {
       clearInterval(recordingTimerId);
@@ -88,7 +113,8 @@ export function initRecording() {
       return;
     }
 
-    recordingCountdown.textContent = `Recording length: ${RECORDING_LENGTH_SECONDS} seconds`;
+    recordingCountdown.textContent =
+      `Auto-stop after ${RECORDING_COUNTDOWN_SECONDS} seconds (${REQUIRED_CLIP_SECONDS}s minimum clip)`;
     recordingCountdown.classList.remove("text-danger", "text-success");
     recordingCountdown.classList.add("text-body-secondary");
   }
@@ -98,7 +124,7 @@ export function initRecording() {
       return;
     }
 
-    const remainingSeconds = Math.max(0, RECORDING_LENGTH_SECONDS - elapsedSeconds);
+    const remainingSeconds = Math.max(0, RECORDING_COUNTDOWN_SECONDS - elapsedSeconds);
 
     if (remainingSeconds > 0) {
       recordingCountdown.textContent =
@@ -134,7 +160,7 @@ export function initRecording() {
         recordBtn.disabled = false;
         stopBtn.disabled = true;
       }
-    }, RECORDING_LENGTH_SECONDS * 1000);
+    }, RECORDING_COUNTDOWN_SECONDS * 1000);
   }
 
   setCountdownDefault();
@@ -151,7 +177,10 @@ export function initRecording() {
       store.uploadedAudioFile = null;
       setPlaybackSource(null);
 
-      mediaRecorder = new MediaRecorder(mediaStream);
+      const recorderOptions = getRecorderOptions();
+      mediaRecorder = recorderOptions
+        ? new MediaRecorder(mediaStream, recorderOptions)
+        : new MediaRecorder(mediaStream);
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -169,10 +198,10 @@ export function initRecording() {
           mediaStream = null;
         }
 
-        if (durationSeconds + 0.05 < RECORDING_LENGTH_SECONDS) {
+        if (durationSeconds + 0.05 < REQUIRED_CLIP_SECONDS) {
           if (recordingCountdown) {
             recordingCountdown.textContent =
-              `Recording cancelled at ${durationSeconds.toFixed(1)}s. A full ${RECORDING_LENGTH_SECONDS}s clip is required.`;
+              `Too short: ${durationSeconds.toFixed(1)}s recorded. At least ${REQUIRED_CLIP_SECONDS}s is required.`;
             recordingCountdown.classList.remove("text-success", "text-body-secondary");
             recordingCountdown.classList.add("text-danger");
           }
@@ -180,7 +209,7 @@ export function initRecording() {
           setPlaybackSource(null);
           refreshPredictButtonState();
           setStatus(
-            `Recording stopped early (${durationSeconds.toFixed(1)}s). Please record the full ${RECORDING_LENGTH_SECONDS} seconds.`
+            `Recording too short (${durationSeconds.toFixed(1)}s). Please record at least ${REQUIRED_CLIP_SECONDS} seconds.`
           );
           recordingStartTime = null;
           return;
@@ -193,7 +222,9 @@ export function initRecording() {
           recordingCountdown.classList.add("text-success");
         }
 
-        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const recordedMimeType =
+          mediaRecorder.mimeType || audioChunks[0]?.type || "audio/webm";
+        const audioBlob = new Blob(audioChunks, { type: recordedMimeType });
 
         store.latestAudioBlob = audioBlob;
         store.uploadedAudioFile = null;
@@ -201,7 +232,7 @@ export function initRecording() {
         refreshPredictButtonState();
 
         setStatus(
-          `Recording ready (${durationSeconds.toFixed(1)}s). Click Predict Accent.`
+          `Recording ready (${durationSeconds.toFixed(1)}s). The first ${REQUIRED_CLIP_SECONDS} seconds will be used.`
         );
         recordingStartTime = null;
       };
@@ -212,7 +243,9 @@ export function initRecording() {
       recordBtn.disabled = true;
       stopBtn.disabled = false;
       refreshPredictButtonState();
-      setStatus(`Recording... the clip will stop automatically after ${RECORDING_LENGTH_SECONDS} seconds.`);
+      setStatus(
+        `Recording... stop any time after ${REQUIRED_CLIP_SECONDS} seconds, or it will auto-stop after ${RECORDING_COUNTDOWN_SECONDS} seconds.`
+      );
     } catch (error) {
       console.error(error);
       stopRecordingTimer();

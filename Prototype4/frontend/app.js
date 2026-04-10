@@ -1,9 +1,10 @@
 // Frontend bootstrap that initializes model loading and recording controls.
 
-import { fetchModels } from "./api.js";
-import { store } from "./store.js";
-import { initRecording } from "./recording.js";
-import { initMap, resetMapView } from "./map.js";
+import { fetchModels } from "./api.js?v=20260409";
+import { store } from "./store.js?v=20260409";
+import { initRecording } from "./recording.js?v=20260409";
+import { initMap, resetMapView } from "./map.js?v=20260409";
+import { clearPredictionResults } from "./predictions.js?v=20260409";
 
 
 function setStatus(message) {
@@ -78,6 +79,14 @@ async function initApp() {
   if (resetMapBtn) {
     resetMapBtn.addEventListener("click", () => {
       resetMapView();
+    });
+  }
+
+  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener("click", () => {
+      clearPredictionResults();
+      setStatus("Previous prediction results cleared.");
     });
   }
 }

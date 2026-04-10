@@ -5,6 +5,22 @@ const API_BASE =
     ? "http://127.0.0.1:8000"
     : "";
 
+function guessRecordingFilename(audioSource) {
+  const mimeType = audioSource?.type ?? "";
+
+  if (mimeType.includes("mp4")) {
+    return "recording.m4a";
+  }
+  if (mimeType.includes("ogg")) {
+    return "recording.ogg";
+  }
+  if (mimeType.includes("wav")) {
+    return "recording.wav";
+  }
+
+  return "recording.webm";
+}
+
 export async function fetchModels() {
   const response = await fetch(`${API_BASE}/api/models`);
 
@@ -21,7 +37,7 @@ export async function predictAudio(audioSource, modelId) {
   if (audioSource instanceof File) {
     formData.append("audio", audioSource, audioSource.name);
   } else {
-    formData.append("audio", audioSource, "recording.webm");
+    formData.append("audio", audioSource, guessRecordingFilename(audioSource));
   }
 
   formData.append("model_id", modelId);

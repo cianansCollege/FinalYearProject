@@ -31,5 +31,11 @@ export const store = {
 
   persist() {
     saveStoredPredictions(this.predictions);
+  },
+
+  clearPredictions() {
+    this.predictions = [];
+    this.currentPredictionId = null;
+    saveStoredPredictions(this.predictions);
   }
 };

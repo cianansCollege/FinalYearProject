@@ -1,7 +1,7 @@
 // Prediction rendering helpers for success and error states in the UI.
 
-import { store } from "./store.js";
-import { updateMap, clearMapHighlight } from "./map.js";
+import { store } from "./store.js?v=20260409";
+import { updateMap, clearMapHighlight } from "./map.js?v=20260409";
 
 function generatePredictionId() {
   return `pred_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -46,6 +46,39 @@ function setFeedbackButtonState(button, isActive) {
 
   button.classList.toggle("active", isActive);
   button.setAttribute("aria-pressed", isActive ? "true" : "false");
+}
+
+function resetFeedbackUI() {
+  const feedbackSection = document.getElementById("feedbackSection");
+  const feedbackPlaceholder = document.getElementById("feedbackPlaceholder");
+  const correctLabelSection = document.getElementById("correctLabelSection");
+  const feedbackMessage = document.getElementById("feedbackMessage");
+  const correctLabelSelect = document.getElementById("correctLabelSelect");
+  const feedbackYesBtn = document.getElementById("feedbackYesBtn");
+  const feedbackNoBtn = document.getElementById("feedbackNoBtn");
+
+  if (feedbackSection) {
+    feedbackSection.classList.add("d-none");
+  }
+
+  if (feedbackPlaceholder) {
+    feedbackPlaceholder.classList.remove("d-none");
+  }
+
+  if (correctLabelSection) {
+    correctLabelSection.classList.add("d-none");
+  }
+
+  if (feedbackMessage) {
+    feedbackMessage.textContent = "";
+  }
+
+  if (correctLabelSelect) {
+    correctLabelSelect.value = "";
+  }
+
+  setFeedbackButtonState(feedbackYesBtn, false);
+  setFeedbackButtonState(feedbackNoBtn, false);
 }
 
 export function renderFeedbackState(prediction = null) {
@@ -177,9 +210,14 @@ export function renderPrediction(result) {
 export function renderPredictionHistory() {
   const historyPlaceholder = document.getElementById("predictionHistoryPlaceholder");
   const historyList = document.getElementById("predictionHistoryList");
+  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
   if (!historyPlaceholder || !historyList) {
     return;
+  }
+
+  if (clearHistoryBtn) {
+    clearHistoryBtn.disabled = !Array.isArray(store.predictions) || store.predictions.length === 0;
   }
 
   if (!Array.isArray(store.predictions) || store.predictions.length === 0) {
@@ -236,42 +274,26 @@ export function renderPredictionHistory() {
   }
 }
 
+export function clearPredictionResults() {
+  store.clearPredictions();
+
+  document.getElementById("resultModel").textContent = "-";
+  document.getElementById("resultLabel").textContent = "-";
+  document.getElementById("resultConfidence").textContent = "-";
+  document.getElementById("probList").innerHTML = "";
+
+  resetFeedbackUI();
+  clearMapHighlight();
+  renderPredictionHistory();
+}
+
 export function renderError(message) {
   document.getElementById("resultModel").textContent = "-";
   document.getElementById("resultLabel").textContent = `Error: ${message}`;
   document.getElementById("resultConfidence").textContent = "-";
   document.getElementById("probList").innerHTML = "";
 
-  const feedbackSection = document.getElementById("feedbackSection");
-  const feedbackPlaceholder = document.getElementById("feedbackPlaceholder");
-  const correctLabelSection = document.getElementById("correctLabelSection");
-  const feedbackMessage = document.getElementById("feedbackMessage");
-  const correctLabelSelect = document.getElementById("correctLabelSelect");
-  const feedbackYesBtn = document.getElementById("feedbackYesBtn");
-  const feedbackNoBtn = document.getElementById("feedbackNoBtn");
-
-  if (feedbackSection) {
-    feedbackSection.classList.add("d-none");
-  }
-
-  if (feedbackPlaceholder) {
-    feedbackPlaceholder.classList.remove("d-none");
-  }
-
-  if (correctLabelSection) {
-    correctLabelSection.classList.add("d-none");
-  }
-
-  if (feedbackMessage) {
-    feedbackMessage.textContent = "";
-  }
-
-  if (correctLabelSelect) {
-    correctLabelSelect.value = "";
-  }
-
-  setFeedbackButtonState(feedbackYesBtn, false);
-  setFeedbackButtonState(feedbackNoBtn, false);
+  resetFeedbackUI();
 }
 
 export function restorePrediction(predictionId) {
