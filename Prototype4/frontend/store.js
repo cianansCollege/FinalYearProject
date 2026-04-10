@@ -23,6 +23,7 @@ function saveStoredPredictions(predictions) {
 export const store = {
   models: [],
   selectedModelId: null,
+  selectedInputDeviceId: null,
   latestAudioBlob: null,
   uploadedAudioFile: null,
 

@@ -1,10 +1,10 @@
 // Frontend bootstrap that initializes model loading and recording controls.
 
-import { fetchModels } from "./api.js?v=20260409";
-import { store } from "./store.js?v=20260409";
-import { initRecording } from "./recording.js?v=20260409";
-import { initMap, resetMapView } from "./map.js?v=20260409";
-import { clearPredictionResults } from "./predictions.js?v=20260409";
+import { fetchModels } from "./api.js?v=20260410e";
+import { store } from "./store.js?v=20260410e";
+import { initRecording } from "./recording.js?v=20260410e";
+import { initMap, resetMapView } from "./map.js?v=20260410e";
+import { clearPredictionResults } from "./predictions.js?v=20260410e";
 
 
 function setStatus(message) {

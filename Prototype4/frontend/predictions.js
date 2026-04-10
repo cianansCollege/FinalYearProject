@@ -1,7 +1,7 @@
 // Prediction rendering helpers for success and error states in the UI.
 
-import { store } from "./store.js?v=20260409";
-import { updateMap, clearMapHighlight } from "./map.js?v=20260409";
+import { store } from "./store.js?v=20260410e";
+import { updateMap, clearMapHighlight } from "./map.js?v=20260410e";
 
 function generatePredictionId() {
   return `pred_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
