@@ -1,7 +1,8 @@
 {
-  "task_name": "ulster_vs_rest",
-  "model_name": "rf",
+  "task_name": "ulster_leinster_rest",
+  "model_name": "logreg",
   "label_classes": [
+    "Leinster",
     "Rest",
     "Ulster"
   ],
