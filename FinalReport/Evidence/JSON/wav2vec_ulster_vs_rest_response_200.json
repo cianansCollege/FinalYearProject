@@ -1,0 +1,20 @@
+
+
+{
+  "request_id": "70667842-f353-4417-86be-bc1f43884a34",
+  "model_id": "wav2vec_ulster_vs_rest_rf",
+  "label": "Rest",
+  "confidence": 0.99,
+  "probs": [
+    {
+      "label": "Rest",
+      "p": 0.99
+    },
+    {
+      "label": "Ulster",
+      "p": 0.01
+    }
+  ]
+}
+
+
