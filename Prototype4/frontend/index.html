@@ -43,6 +43,9 @@
                 <select id="modelSelect" class="form-select">
                   <option>Loading models...</option>
                 </select>
+                <div id="modelDescription" class="form-text mt-2">
+                  Loading model description...
+                </div>
 
                 <label for="inputDeviceSelect" class="form-label mt-3">Microphone</label>
                 <select id="inputDeviceSelect" class="form-select">
@@ -89,7 +92,8 @@
               <div class="card-body">
                 <h2 class="h5 card-title mb-3">Current Prediction</h2>
 
-                <p class="mb-2"><strong>Model:</strong> <span id="resultModel">-</span></p>
+                <p class="mb-1"><strong>Model:</strong> <span id="resultModel">-</span></p>
+                <p id="resultModelDescription" class="small text-body-secondary mb-2 d-none"></p>
                 <p class="mb-2"><strong>Prediction:</strong> <span id="resultLabel">-</span></p>
                 <p class="mb-3"><strong>Confidence:</strong> <span id="resultConfidence">-</span></p>
 
@@ -208,6 +212,6 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
-  <script type="module" src="/static/app.js?v=20260410e"></script>
+  <script type="module" src="/static/app.js?v=20260415b"></script>
 </body>
 </html>

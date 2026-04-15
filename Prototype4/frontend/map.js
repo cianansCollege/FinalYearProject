@@ -1,5 +1,3 @@
-// Province card highlight helpers for displaying the predicted label.
-
 let map;
 let provinceLayers = {};
 let geojsonLayer;
@@ -19,9 +17,43 @@ const highlightStyle = {
   fillOpacity: 0.6
 };
 
-
 const INITIAL_CENTER = [53.4, -8.2];
 const INITIAL_ZOOM = 7;
+
+function normalizeName(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function getRegionsToHighlight(modelId, label) {
+  const cleanLabel = String(label || "").trim();
+
+  if (modelId === "wav2vec_ulster_vs_rest_rf") {
+    if (cleanLabel === "Ulster") return ["Ulster"];
+    if (cleanLabel === "Rest") return ["Leinster", "Munster", "Connacht"];
+  }
+
+  if (modelId === "wav2vec_leinster_vs_rest_logreg") {
+    if (cleanLabel === "Leinster") return ["Leinster"];
+    if (cleanLabel === "Rest") return ["Ulster", "Munster", "Connacht"];
+  }
+
+  if (modelId === "wav2vec_ulster_leinster_rest_logreg") {
+    if (cleanLabel === "Ulster") return ["Ulster"];
+    if (cleanLabel === "Leinster") return ["Leinster"];
+    if (cleanLabel === "Rest") return ["Munster", "Connacht"];
+  }
+
+  if (
+    modelId === "wav2vec_province_4way_logreg" ||
+    modelId === "mfcc_logreg_v1_01"
+  ) {
+    if (["Ulster", "Leinster", "Munster", "Connacht"].includes(cleanLabel)) {
+      return [cleanLabel];
+    }
+  }
+
+  return [];
+}
 
 export async function initMap() {
   map = L.map("map").setView(INITIAL_CENTER, INITIAL_ZOOM);
@@ -40,8 +72,7 @@ export async function initMap() {
     style: defaultStyle,
     onEachFeature: (feature, layer) => {
       const name = feature.properties.NAME;
-      provinceLayers[name] = layer;
-
+      provinceLayers[normalizeName(name)] = layer;
       layer.bindTooltip(name);
     }
   }).addTo(map);
@@ -49,14 +80,17 @@ export async function initMap() {
   mapReady = true;
 }
 
-export function updateMap(label) {
+export function updateMap(modelId, label) {
   clearMapHighlight();
 
-  const layer = provinceLayers[label];
+  const regions = getRegionsToHighlight(modelId, label);
 
-  if (!layer) return;
-
-  layer.setStyle(highlightStyle);
+  regions.forEach((regionName) => {
+    const layer = provinceLayers[normalizeName(regionName)];
+    if (layer) {
+      layer.setStyle(highlightStyle);
+    }
+  });
 }
 
 export function resetMapView() {

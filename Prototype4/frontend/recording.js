@@ -9,8 +9,8 @@ import {
   renderPredictionHistory,
   savePrediction,
   updatePredictionFeedback,
-} from "./predictions.js?v=20260410e";
-import { updateMap, clearMapHighlight } from "./map.js?v=20260410e";
+} from "./predictions.js?v=20260415b";
+import { updateMap, clearMapHighlight } from "./map.js?v=20260415c";
 
 let mediaStream = null;
 let recordingTrack = null;
@@ -653,8 +653,10 @@ export function initRecording() {
       renderPredictionHistory();
 
       const predictedLabel = result.label ?? result.predicted_label ?? null;
-      if (predictedLabel) {
-        updateMap(predictedLabel);
+      const predictionModelId = result.model_id ?? store.selectedModelId ?? null;
+
+      if (predictionModelId && predictedLabel) {
+        updateMap(predictionModelId, predictedLabel);
       }
 
       setStatus("Prediction complete.");

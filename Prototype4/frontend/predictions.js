@@ -1,7 +1,7 @@
 // Prediction rendering helpers for success and error states in the UI.
 
 import { store } from "./store.js?v=20260410e";
-import { updateMap, clearMapHighlight } from "./map.js?v=20260410e";
+import { updateMap, clearMapHighlight } from "./map.js?v=20260415c";
 
 function generatePredictionId() {
   return `pred_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -37,6 +37,42 @@ function formatFeedbackStatus(prediction) {
   }
 
   return "Feedback: Pending";
+}
+
+function resolveModelDetails(modelId, fallbackName = "", fallbackDescription = "") {
+  const storedModel = store.models.find((model) => model.id === modelId);
+
+  return {
+    name: storedModel?.name ?? fallbackName ?? modelId ?? "-",
+    description: storedModel?.description ?? fallbackDescription ?? "",
+  };
+}
+
+function renderModelDetails(modelId, fallbackName = "", fallbackDescription = "") {
+  const modelEl = document.getElementById("resultModel");
+  const descriptionEl = document.getElementById("resultModelDescription");
+  const { name, description } = resolveModelDetails(
+    modelId,
+    fallbackName,
+    fallbackDescription
+  );
+
+  if (modelEl) {
+    modelEl.textContent = name || "-";
+  }
+
+  if (!descriptionEl) {
+    return;
+  }
+
+  if (description) {
+    descriptionEl.textContent = description;
+    descriptionEl.classList.remove("d-none");
+    return;
+  }
+
+  descriptionEl.textContent = "";
+  descriptionEl.classList.add("d-none");
 }
 
 function setFeedbackButtonState(button, isActive) {
@@ -140,10 +176,18 @@ export function renderFeedbackState(prediction = null) {
 }
 
 export function savePrediction(result) {
+  const modelDetails = resolveModelDetails(
+    result.model_id ?? null,
+    result.model_name ?? "",
+    result.model_description ?? ""
+  );
+
   const prediction = {
     id: generatePredictionId(),
     timestamp: new Date().toISOString(),
     modelId: result.model_id ?? null,
+    modelName: modelDetails.name,
+    modelDescription: modelDetails.description,
     predictedLabel: result.label ?? null,
     confidence: typeof result.confidence === "number" ? result.confidence : null,
     probabilities: Array.isArray(result.probs) ? result.probs : [],
@@ -176,7 +220,11 @@ export function updatePredictionFeedback({ wasCorrect, correctedLabel = null }) 
 }
 
 export function renderPrediction(result) {
-  document.getElementById("resultModel").textContent = result.model_id || "-";
+  renderModelDetails(
+    result.model_id ?? null,
+    result.model_name ?? "",
+    result.model_description ?? ""
+  );
   document.getElementById("resultLabel").textContent = result.label || "-";
 
   document.getElementById("resultConfidence").textContent =
@@ -277,7 +325,7 @@ export function renderPredictionHistory() {
 export function clearPredictionResults() {
   store.clearPredictions();
 
-  document.getElementById("resultModel").textContent = "-";
+  renderModelDetails(null);
   document.getElementById("resultLabel").textContent = "-";
   document.getElementById("resultConfidence").textContent = "-";
   document.getElementById("probList").innerHTML = "";
@@ -288,7 +336,7 @@ export function clearPredictionResults() {
 }
 
 export function renderError(message) {
-  document.getElementById("resultModel").textContent = "-";
+  renderModelDetails(null);
   document.getElementById("resultLabel").textContent = `Error: ${message}`;
   document.getElementById("resultConfidence").textContent = "-";
   document.getElementById("probList").innerHTML = "";
@@ -308,6 +356,8 @@ export function restorePrediction(predictionId) {
   // Restore result UI
   renderPrediction({
     model_id: prediction.modelId,
+    model_name: prediction.modelName,
+    model_description: prediction.modelDescription,
     label: prediction.predictedLabel,
     confidence: prediction.confidence,
     probs: prediction.probabilities,
@@ -317,8 +367,8 @@ export function restorePrediction(predictionId) {
 
   // Restore map
   clearMapHighlight();
-  if (prediction.predictedLabel) {
-    updateMap(prediction.predictedLabel);
+  if (prediction.modelId && prediction.predictedLabel) {
+    updateMap(prediction.modelId, prediction.predictedLabel);
   }
 
   // Re-render history to highlight selected

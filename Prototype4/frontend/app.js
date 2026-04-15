@@ -2,13 +2,30 @@
 
 import { fetchModels } from "./api.js?v=20260410e";
 import { store } from "./store.js?v=20260410e";
-import { initRecording } from "./recording.js?v=20260410e";
-import { initMap, resetMapView } from "./map.js?v=20260410e";
-import { clearPredictionResults } from "./predictions.js?v=20260410e";
+import { initRecording } from "./recording.js?v=20260415b";
+import { initMap, resetMapView } from "./map.js?v=20260415c";
+import { clearPredictionResults } from "./predictions.js?v=20260415b";
 
 
 function setStatus(message) {
   document.getElementById("statusMessage").textContent = message;
+}
+
+function renderSelectedModelDescription(modelId) {
+  const modelDescription = document.getElementById("modelDescription");
+  if (!modelDescription) {
+    return;
+  }
+
+  const model = store.models.find((item) => item.id === modelId);
+
+  if (!model) {
+    modelDescription.textContent = "No model description available.";
+    return;
+  }
+
+  modelDescription.textContent =
+    model.description || "No model description available.";
 }
 
 async function initModels() {
@@ -22,11 +39,12 @@ async function initModels() {
 
     const models = rawModels.map((model) => {
       if (typeof model === "string") {
-        return { id: model, name: model };
+        return { id: model, name: model, description: "" };
       }
       return {
         id: model.id,
         name: model.name ?? model.id,
+        description: model.description ?? "",
       };
     });
 
@@ -39,6 +57,7 @@ async function initModels() {
       option.textContent = "No models available";
       modelSelect.appendChild(option);
       store.selectedModelId = null;
+      renderSelectedModelDescription(null);
       setStatus("No models found.");
       return;
     }
@@ -52,9 +71,11 @@ async function initModels() {
 
     store.selectedModelId = models[0].id;
     modelSelect.value = store.selectedModelId;
+    renderSelectedModelDescription(store.selectedModelId);
 
     modelSelect.addEventListener("change", (event) => {
       store.selectedModelId = event.target.value;
+      renderSelectedModelDescription(store.selectedModelId);
       setStatus(`Selected model: ${store.selectedModelId}`);
     });
 

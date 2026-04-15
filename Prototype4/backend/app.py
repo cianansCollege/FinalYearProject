@@ -19,7 +19,7 @@ load_plugins()
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
 
-app = FastAPI(title="Prototype3 Accent API")
+app = FastAPI(title="Prototype4 Accent API")
 
 app.add_middleware(
     CORSMiddleware,
