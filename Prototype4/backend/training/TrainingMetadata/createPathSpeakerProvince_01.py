@@ -1,3 +1,10 @@
+"""Builds the reduced metadata CSV used by the MFCC training script.
+
+This small preparation step takes a larger source spreadsheet and keeps only the
+columns needed by the training pipeline: cleaned clip path, speaker identity,
+and province label.
+"""
+
 import pandas as pd
 
 input_csv = "/Users/cianan/Documents/College/GitHub/FYP/Data/speaker_master_clean_10s_lufs.csv"

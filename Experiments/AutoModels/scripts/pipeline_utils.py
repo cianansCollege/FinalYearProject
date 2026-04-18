@@ -133,7 +133,7 @@ def run_cv_experiment(X, y, speakers, model, n_splits=5):
 # Summary metrics
 # --------------------------------------------------
 
-def summarize_results(fold_results):
+def summarise_results(fold_results):
     df = pd.DataFrame(fold_results)
 
     summary = {

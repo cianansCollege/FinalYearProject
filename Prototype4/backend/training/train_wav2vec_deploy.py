@@ -1,3 +1,11 @@
+"""Trains the wav2vec-based classifier variants used by the backend plugins.
+
+This script is part of the offline training workflow. It reads the prepared
+training CSV, builds wav2vec feature matrices through the experiments package,
+trains several deployment targets, and saves the artefacts consumed by the
+wav2vec plugin family in the live application.
+"""
+
 from __future__ import annotations
 
 import json
@@ -33,6 +41,7 @@ DEPLOY_CONFIGS = [
 
 
 def train_one(df: pd.DataFrame, task_name: str, model_name: str):
+    # Materialise the subset and labels for one deployment task.
     task_fn = get_task(task_name)
     X_df, y = task_fn(df)
 
@@ -41,11 +50,13 @@ def train_one(df: pd.DataFrame, task_name: str, model_name: str):
 
     print(f"\n=== Training {task_name} | {model_name} ===")
 
+    # Build wav2vec features using the external experiment utilities.
     X = build_feature_matrix(X_df)
 
     label_encoder = LabelEncoder()
     y_encoded = label_encoder.fit_transform(np.array(y)).astype(np.int64)
 
+    # Train the selected classifier on the task-specific embeddings.
     model = get_model(model_name)
     model.fit(X, y_encoded)
 
@@ -58,6 +69,7 @@ def train_one(df: pd.DataFrame, task_name: str, model_name: str):
     joblib.dump(model, model_path)
     joblib.dump(label_encoder, le_path)
 
+    # Save enough metadata for inspection and later deployment checks.
     metadata = {
         "task_name": task_name,
         "model_name": model_name,
@@ -72,6 +84,7 @@ def train_one(df: pd.DataFrame, task_name: str, model_name: str):
 
 
 def main():
+    # Train each deployment target from the same source CSV.
     df = pd.read_csv(CSV_PATH)
 
     for task_name, model_name in DEPLOY_CONFIGS:

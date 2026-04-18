@@ -1,4 +1,7 @@
-// Frontend bootstrap that initializes model loading and recording controls.
+// Frontend bootstrap for the main user flow.
+// This module runs when the page loads, fetches model metadata for the control
+// panel, initializes the map and recording modules, and wires the global UI
+// actions such as reset and clear history.
 
 import { fetchModels } from "./api.js?v=20260410e";
 import { store } from "./store.js?v=20260410e";
@@ -8,10 +11,12 @@ import { clearPredictionResults } from "./predictions.js?v=20260415b";
 
 
 function setStatus(message) {
+  // Centralise status updates so the page reports the current pipeline step.
   document.getElementById("statusMessage").textContent = message;
 }
 
 function renderSelectedModelDescription(modelId) {
+  // Show the selected model descriptor beneath the dropdown in the controls panel.
   const modelDescription = document.getElementById("modelDescription");
   if (!modelDescription) {
     return;
@@ -29,6 +34,7 @@ function renderSelectedModelDescription(modelId) {
 }
 
 async function initModels() {
+  // Populate the model selector from the backend metadata endpoint.
   const modelSelect = document.getElementById("modelSelect");
 
   try {
@@ -62,6 +68,7 @@ async function initModels() {
       return;
     }
 
+    // Keep the backend order so the UI reflects the registered plugin order.
     for (const model of models) {
       const option = document.createElement("option");
       option.value = model.id;
@@ -87,6 +94,7 @@ async function initModels() {
 }
 
 async function initApp() {
+  // Start the supporting modules in the same order the page needs them.
   try {
     await initMap();
   } catch (error) {

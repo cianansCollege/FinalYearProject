@@ -1,4 +1,6 @@
-/* Dark dashboard styling for Prototype4. */
+/* Active dark theme for the deployed frontend.
+   These styles shape the card-based layout used by the controls, prediction,
+   history, feedback, and map panels served by FastAPI. */
 
 body {
   min-height: 100vh;

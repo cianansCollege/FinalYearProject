@@ -1,3 +1,10 @@
+"""Wraps the deployed three-class wav2vec model for API use.
+
+This variant predicts Ulster, Leinster, or Rest. It plugs into the same
+runtime path as the other wav2vec models and formats the classifier output for
+the shared frontend renderer.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -17,6 +24,7 @@ class Wav2VecUlsterLeinsterRestLogReg(ModelPlugin):
     description = "Three-class accent classifier for Ulster, Leinster, and Rest."
 
     def __init__(self) -> None:
+        # Load the saved model and encoder once during backend startup.
         self.model = joblib.load(
             ARTIFACTS_DIR / "wav2vec_ulster_leinster_rest_logreg_model.joblib"
         )
@@ -25,12 +33,14 @@ class Wav2VecUlsterLeinsterRestLogReg(ModelPlugin):
         )
 
     def predict(self, audio_bytes: bytes) -> dict:
+        # Reuse the shared wav2vec embedding path used across this model family.
         embedding = audio_bytes_to_embedding(audio_bytes)
 
         probs = self.model.predict_proba([embedding])[0]
         pred_idx = int(np.argmax(probs))
         label = self.label_encoder.inverse_transform([pred_idx])[0]
 
+        # Build a sorted probability list for the current prediction panel.
         probs_list = [
             {
                 "label": str(self.label_encoder.inverse_transform([i])[0]),

@@ -1,4 +1,9 @@
-# Feature extraction helpers (for example MFCC vectors) used by plugins.
+"""Builds MFCC features for the classical model pipeline.
+
+The MFCC plugin calls this after audio decoding. It converts the shared
+waveform representation into a fixed-length feature vector that can be passed to
+the logistic regression classifier.
+"""
 
 from __future__ import annotations
 
@@ -17,6 +22,7 @@ def extract_mfcc_summary_features(
     Output shape:
     [mfcc_means..., mfcc_stds...] => length = n_mfcc * 2
     """
+    # Compute frame-level MFCCs, then compress them into summary statistics.
     mfcc = librosa.feature.mfcc(y=waveform, sr=sr, n_mfcc=n_mfcc)
 
     mfcc_means = np.mean(mfcc, axis=1)
@@ -24,4 +30,3 @@ def extract_mfcc_summary_features(
 
     features = np.concatenate([mfcc_means, mfcc_stds]).astype(np.float32)
     return features
-

@@ -1,4 +1,9 @@
-"""Placeholder for an MFCC + Logistic Regression model plugin implementation."""
+"""Wraps the deployed MFCC-based province classifier as a runtime plugin.
+
+This is the classical feature pipeline in the live system. During prediction it
+decodes the uploaded clip, extracts MFCC summary features, and feeds them to
+the saved logistic regression model before formatting the response for the API.
+"""
 
 from __future__ import annotations
 
@@ -18,12 +23,14 @@ class MFCCLogRegV1(ModelPlugin):
     description = "MFCC summary features with a Logistic Regression classifier."
 
     def __init__(self) -> None:
+        # Load the trained classifier and label encoder once at startup.
         model_dir = Path(__file__).resolve().parent.parent / "artifacts"
 
         self.model = joblib.load(model_dir / "mfcc_logreg_v1_model_01.joblib")
         self.label_encoder = joblib.load(model_dir / "mfcc_logreg_v1_label_encoder_01.joblib")
 
     def predict(self, audio_bytes: bytes) -> dict:
+        # Follow the shared runtime pipeline: decode, featurise, classify, format.
         waveform, sr = load_audio_from_bytes(audio_bytes)
         features = extract_mfcc_summary_features(waveform, sr)
 
@@ -34,6 +41,7 @@ class MFCCLogRegV1(ModelPlugin):
         pred_label = str(self.label_encoder.inverse_transform([pred_index])[0])
         confidence = float(probs[pred_index])
 
+        # Return a sorted probability list for the frontend panel and history.
         labels = self.label_encoder.classes_
         prob_list = [
             {"label": str(label), "p": float(prob)}
@@ -47,5 +55,5 @@ class MFCCLogRegV1(ModelPlugin):
             "probs": prob_list,
         }
 
-
+# Export the startup instance used by the plugin loader.
 plugin = MFCCLogRegV1()

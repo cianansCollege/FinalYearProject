@@ -1,4 +1,7 @@
-// Microphone capture flow and predict-button wiring for the frontend.
+// Handles audio capture and submission in the main user workflow.
+// This module sits between the controls panel and the backend: it manages
+// microphone recording, file uploads, playback setup, and calls to the
+// prediction endpoint.
 
 import { store } from "./store.js?v=20260410e";
 import { predictAudio } from "./api.js?v=20260410e";
@@ -40,10 +43,12 @@ const MICROPHONE_CONSTRAINT_CANDIDATES = [
 ];
 
 function setStatus(message) {
+  // Keep status updates local to the recording and prediction workflow.
   document.getElementById("statusMessage").textContent = message;
 }
 
 export function initRecording() {
+  // Wire the controls panel once the page has loaded and models are available.
   const recordBtn = document.getElementById("recordBtn");
   const stopBtn = document.getElementById("stopBtn");
   const predictBtn = document.getElementById("predictBtn");
@@ -65,6 +70,7 @@ export function initRecording() {
   }
 
   function setPlaybackSource(source) {
+    // Rebuild the audio preview element whenever the active source changes.
     if (playbackObjectUrl) {
       URL.revokeObjectURL(playbackObjectUrl);
       playbackObjectUrl = null;
@@ -87,6 +93,7 @@ export function initRecording() {
   }
 
   function refreshPredictButtonState() {
+    // Enable prediction only when there is a clip ready to submit.
     const hasAudioSource = Boolean(
       store.uploadedAudioFile || store.latestAudioBlob
     );
@@ -94,6 +101,7 @@ export function initRecording() {
   }
 
   async function loadInputDevices(preferredDeviceId = store.selectedInputDeviceId) {
+    // Refresh the microphone dropdown using the browser's current device list.
     if (
       !inputDeviceSelect ||
       !navigator.mediaDevices ||
@@ -142,6 +150,7 @@ export function initRecording() {
   }
 
   function stopRecordingTimer() {
+    // Stop the countdown interval used while recording.
     if (recordingTimerId) {
       clearInterval(recordingTimerId);
       recordingTimerId = null;
@@ -149,6 +158,7 @@ export function initRecording() {
   }
 
   function stopAutoStopTimer() {
+    // Cancel the auto-stop timeout if recording ends early.
     if (recordingAutoStopId) {
       clearTimeout(recordingAutoStopId);
       recordingAutoStopId = null;
@@ -156,6 +166,7 @@ export function initRecording() {
   }
 
   function setCountdownDefault() {
+    // Restore the helper text shown before recording starts.
     if (!recordingCountdown) {
       return;
     }
@@ -167,6 +178,7 @@ export function initRecording() {
   }
 
   function renderRecordingTimer(elapsedSeconds) {
+    // Update the live countdown while a recording is in progress.
     if (!recordingCountdown) {
       return;
     }
@@ -191,6 +203,7 @@ export function initRecording() {
   }
 
   function startRecordingTimer() {
+    // Start the UI timer that mirrors the recording window.
     stopRecordingTimer();
     renderRecordingTimer(0);
     recordingTimerId = setInterval(() => {
@@ -203,12 +216,14 @@ export function initRecording() {
   }
 
   function writeAscii(view, offset, text) {
+    // Helper used when manually writing the WAV header.
     for (let index = 0; index < text.length; index += 1) {
       view.setUint8(offset + index, text.charCodeAt(index));
     }
   }
 
   function encodeMonoWav(samples, sampleRate) {
+    // Export captured PCM samples to a browser-playable WAV blob.
     const bytesPerSample = 2;
     const blockAlign = bytesPerSample;
     const buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
@@ -243,6 +258,7 @@ export function initRecording() {
   }
 
   function downmixToMono(audioBuffer) {
+    // Collapse browser audio buffers to mono before export and logging.
     const monoSamples = new Float32Array(audioBuffer.length);
 
     for (let channel = 0; channel < audioBuffer.numberOfChannels; channel += 1) {
@@ -262,6 +278,7 @@ export function initRecording() {
   }
 
   function mergeFloat32Chunks(chunks) {
+    // Combine recorded audio blocks into one contiguous sample array.
     const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
     const merged = new Float32Array(totalLength);
     let offset = 0;
@@ -275,6 +292,7 @@ export function initRecording() {
   }
 
   function logTrackDiagnostics(track) {
+    // Log browser microphone metadata to help with capture debugging.
     console.log("Mic track label:", track?.label ?? "(unknown)");
     console.log("Mic track settings:", track?.getSettings?.() ?? {});
     console.log("Mic track constraints:", track?.getConstraints?.() ?? {});
@@ -286,6 +304,7 @@ export function initRecording() {
   }
 
   async function requestMicrophoneStream() {
+    // Try the selected microphone first, then fall back to simpler constraints.
     let lastError = null;
 
     const constraintCandidates = [];
@@ -316,6 +335,7 @@ export function initRecording() {
   }
 
   async function cleanupCaptureGraph() {
+    // Tear down any existing Web Audio graph before starting a new recording.
     if (recordingProcessorNode) {
       recordingProcessorNode.onaudioprocess = null;
       recordingProcessorNode.disconnect();
@@ -339,6 +359,7 @@ export function initRecording() {
   }
 
   async function startPcmCapture(stream) {
+    // Capture raw PCM samples so recorded clips are not tied to MediaRecorder codecs.
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) {
       throw new Error("Audio recording is not supported in this browser.");
@@ -364,6 +385,7 @@ export function initRecording() {
     recordingMonitorNode.gain.value = 0;
 
     recordingProcessorNode.onaudioprocess = (event) => {
+      // Buffer the incoming samples and track simple level diagnostics.
       const monoChunk = downmixToMono(event.inputBuffer);
       recordedPcmChunks.push(monoChunk);
 
@@ -395,6 +417,7 @@ export function initRecording() {
   }
 
   async function stopPcmCapture() {
+    // Finish PCM capture and return the final WAV blob.
     const mergedSamples = mergeFloat32Chunks(recordedPcmChunks);
     const sampleRate = recordedSampleRate;
 
@@ -409,6 +432,7 @@ export function initRecording() {
   }
 
   function stopMediaStream() {
+    // Release the active browser microphone stream once recording ends.
     if (mediaStream) {
       mediaStream.getTracks().forEach((track) => track.stop());
       mediaStream = null;
@@ -417,6 +441,7 @@ export function initRecording() {
   }
 
   async function finalizeRecording() {
+    // Complete the recording flow, validate the clip, and prepare playback/upload.
     if (!recordingStartTime || isStoppingRecording) {
       return;
     }
@@ -453,6 +478,7 @@ export function initRecording() {
 
     stopMediaStream();
 
+    // Reject recordings that do not meet the minimum duration.
     if (durationSeconds + 0.05 < REQUIRED_CLIP_SECONDS) {
       if (recordingCountdown) {
         recordingCountdown.textContent =
@@ -474,6 +500,7 @@ export function initRecording() {
       return;
     }
 
+    // Stop here if capture failed before a playable blob could be produced.
     if (!audioBlob) {
       if (recordingCountdown) {
         recordingCountdown.textContent =
@@ -512,6 +539,7 @@ export function initRecording() {
       recordingCountdown.classList.add("text-success");
     }
 
+    // Make the new clip available for preview and prediction.
     store.latestAudioBlob = audioBlob;
     store.uploadedAudioFile = null;
     setPlaybackSource(audioBlob);
@@ -526,6 +554,7 @@ export function initRecording() {
   }
 
   function startAutoStopTimer() {
+    // End the recording automatically once the countdown window expires.
     stopAutoStopTimer();
     recordingAutoStopId = setTimeout(async () => {
       if (!recordingStartTime || isStoppingRecording) {
@@ -542,6 +571,7 @@ export function initRecording() {
 
   if (inputDeviceSelect) {
     inputDeviceSelect.addEventListener("change", () => {
+      // Persist the chosen microphone for the rest of the current session.
       store.selectedInputDeviceId = inputDeviceSelect.value || null;
       setStatus(
         store.selectedInputDeviceId
@@ -553,6 +583,7 @@ export function initRecording() {
 
   recordBtn.addEventListener("click", async () => {
     try {
+      // Start a fresh recording from the chosen input device.
       mediaStream = await requestMicrophoneStream();
       recordingTrack = mediaStream.getAudioTracks()[0] ?? null;
 
@@ -596,11 +627,13 @@ export function initRecording() {
   });
 
   stopBtn.addEventListener("click", async () => {
+    // Manual stop follows the same completion path as auto-stop.
     await finalizeRecording();
   });
 
   if (audioFileInput) {
     const onFileSelected = () => {
+      // Switch the active audio source from recorded audio to the chosen file.
       const file = audioFileInput.files?.[0] ?? null;
 
       if (!file) {
@@ -624,6 +657,7 @@ export function initRecording() {
   }
 
   predictBtn.addEventListener("click", async () => {
+    // Submit whichever clip is currently active in the controls panel.
     if (!store.selectedModelId) {
       setStatus("No model selected.");
       return;
@@ -648,6 +682,7 @@ export function initRecording() {
 
       const result = await predictAudio(audioSource, store.selectedModelId);
 
+      // Save and render the result before syncing the map highlight.
       savePrediction(result);
       renderPrediction(result);
       renderPredictionHistory();
@@ -669,6 +704,7 @@ export function initRecording() {
 
   if (feedbackYesBtn) {
     feedbackYesBtn.addEventListener("click", () => {
+      // Mark the active prediction as correct and refresh the history display.
       const updated = updatePredictionFeedback({
         wasCorrect: true,
         correctedLabel: null,
@@ -693,6 +729,7 @@ export function initRecording() {
 
   if (feedbackNoBtn) {
     feedbackNoBtn.addEventListener("click", () => {
+      // Reveal the correction controls when the user marks a result as incorrect.
       if (correctLabelSection) {
         correctLabelSection.classList.remove("d-none");
       }
@@ -705,6 +742,7 @@ export function initRecording() {
 
   if (saveCorrectionBtn) {
     saveCorrectionBtn.addEventListener("click", () => {
+      // Store the corrected province label against the current history item.
       const correctedLabel = correctLabelSelect?.value ?? "";
 
       if (!correctedLabel) {

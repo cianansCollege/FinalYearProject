@@ -1,4 +1,6 @@
-/* Bootstrap-first overrides and dashboard layout styling for Prototype4. */
+/* Alternate light theme retained for the same frontend layout.
+   It is not the active stylesheet, but it mirrors the structure of the dark
+   theme for comparison and experimentation. */
 
 body {
   min-height: 100vh;

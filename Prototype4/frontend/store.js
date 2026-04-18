@@ -1,6 +1,11 @@
+// Small shared state container for the frontend modules.
+// It tracks the selected model, current audio source, and prediction history
+// persisted in localStorage between page reloads.
+
 const STORAGE_KEY = "fyp_predictions";
 
 function loadStoredPredictions() {
+  // Restore saved prediction history when the page boots.
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
@@ -13,6 +18,7 @@ function loadStoredPredictions() {
 }
 
 function saveStoredPredictions(predictions) {
+  // Persist the history list after prediction or feedback changes.
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(predictions));
   } catch (e) {
@@ -31,10 +37,12 @@ export const store = {
   currentPredictionId: null,
 
   persist() {
+    // Save the current prediction history snapshot.
     saveStoredPredictions(this.predictions);
   },
 
   clearPredictions() {
+    // Remove all saved history entries and reset the current selection.
     this.predictions = [];
     this.currentPredictionId = null;
     saveStoredPredictions(this.predictions);

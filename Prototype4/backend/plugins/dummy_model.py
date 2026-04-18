@@ -1,4 +1,9 @@
-"""Deterministic dummy model plugin used to test end-to-end API/frontend flow."""
+"""Provides a predictable non-ML plugin for integration checks.
+
+This plugin is useful for frontend and API wiring because it does not depend on
+audio decoding or model artifacts. It is not part of the real inference
+pipeline, but it follows the same response shape as the deployed models.
+"""
 
 from __future__ import annotations
 
@@ -11,6 +16,7 @@ class DummyModel(ModelPlugin):
     description = "Test model for end-to-end frontend/backend integration."
 
     def predict(self, audio_bytes: bytes) -> dict:
+        # Use the byte length to produce repeatable outputs for UI testing.
         audio_size = len(audio_bytes)
 
         if audio_size % 4 == 0:
@@ -52,5 +58,5 @@ class DummyModel(ModelPlugin):
             "probs": probs,
         }
 
-
+# Export a ready-made instance so startup registration can import it directly.
 plugin = DummyModel()

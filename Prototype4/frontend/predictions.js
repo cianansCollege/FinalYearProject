@@ -1,17 +1,22 @@
-// Prediction rendering helpers for success and error states in the UI.
+// Rendering helpers for the prediction side of the frontend.
+// This module is called after a prediction completes, when feedback changes,
+// and when a saved result is restored from local history.
 
 import { store } from "./store.js?v=20260410e";
 import { updateMap, clearMapHighlight } from "./map.js?v=20260415c";
 
 function generatePredictionId() {
+  // Create a simple client-side identifier for history entries.
   return `pred_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function formatConfidencePct(confidence) {
+  // Keep confidence formatting consistent across the main panel and history.
   return typeof confidence === "number" ? `${(confidence * 100).toFixed(1)}%` : "-";
 }
 
 function formatHistoryTimestamp(timestamp) {
+  // Convert stored ISO timestamps into a browser-local display string.
   if (!timestamp) {
     return "-";
   }
@@ -25,6 +30,7 @@ function formatHistoryTimestamp(timestamp) {
 }
 
 function formatFeedbackStatus(prediction) {
+  // Summarise saved feedback for each history row.
   if (prediction.wasCorrect === true) {
     return "Feedback: Correct";
   }
@@ -40,6 +46,7 @@ function formatFeedbackStatus(prediction) {
 }
 
 function resolveModelDetails(modelId, fallbackName = "", fallbackDescription = "") {
+  // Prefer live model metadata, but keep stored details for restored history items.
   const storedModel = store.models.find((model) => model.id === modelId);
 
   return {
@@ -49,6 +56,7 @@ function resolveModelDetails(modelId, fallbackName = "", fallbackDescription = "
 }
 
 function renderModelDetails(modelId, fallbackName = "", fallbackDescription = "") {
+  // Update the current prediction card with the selected model name and descriptor.
   const modelEl = document.getElementById("resultModel");
   const descriptionEl = document.getElementById("resultModelDescription");
   const { name, description } = resolveModelDetails(
@@ -76,6 +84,7 @@ function renderModelDetails(modelId, fallbackName = "", fallbackDescription = ""
 }
 
 function setFeedbackButtonState(button, isActive) {
+  // Keep button visuals and accessibility state in sync.
   if (!button) {
     return;
   }
@@ -85,6 +94,7 @@ function setFeedbackButtonState(button, isActive) {
 }
 
 function resetFeedbackUI() {
+  // Return the feedback panel to its default hidden state.
   const feedbackSection = document.getElementById("feedbackSection");
   const feedbackPlaceholder = document.getElementById("feedbackPlaceholder");
   const correctLabelSection = document.getElementById("correctLabelSection");
@@ -118,6 +128,7 @@ function resetFeedbackUI() {
 }
 
 export function renderFeedbackState(prediction = null) {
+  // Show the feedback controls once there is an active prediction in view.
   const feedbackSection = document.getElementById("feedbackSection");
   const feedbackPlaceholder = document.getElementById("feedbackPlaceholder");
   const correctLabelSection = document.getElementById("correctLabelSection");
@@ -176,6 +187,7 @@ export function renderFeedbackState(prediction = null) {
 }
 
 export function savePrediction(result) {
+  // Store the latest result so it can be revisited from the history panel.
   const modelDetails = resolveModelDetails(
     result.model_id ?? null,
     result.model_name ?? "",
@@ -203,6 +215,7 @@ export function savePrediction(result) {
 }
 
 export function updatePredictionFeedback({ wasCorrect, correctedLabel = null }) {
+  // Update feedback on the currently selected history entry.
   const prediction = store.predictions.find(
     (item) => item.id === store.currentPredictionId
   );
@@ -220,6 +233,7 @@ export function updatePredictionFeedback({ wasCorrect, correctedLabel = null }) 
 }
 
 export function renderPrediction(result) {
+  // Populate the current prediction card from an API response or history item.
   renderModelDetails(
     result.model_id ?? null,
     result.model_name ?? "",
@@ -234,6 +248,7 @@ export function renderPrediction(result) {
   probList.innerHTML = "";
 
   if (Array.isArray(result.probs)) {
+    // Render the per-class breakdown shown beneath the headline prediction.
     for (const item of result.probs) {
       const li = document.createElement("li");
       li.className = "list-group-item d-flex justify-content-between align-items-center";
@@ -256,6 +271,7 @@ export function renderPrediction(result) {
 }
 
 export function renderPredictionHistory() {
+  // Rebuild the history list from the predictions stored in localStorage.
   const historyPlaceholder = document.getElementById("predictionHistoryPlaceholder");
   const historyList = document.getElementById("predictionHistoryList");
   const clearHistoryBtn = document.getElementById("clearHistoryBtn");
@@ -280,6 +296,7 @@ export function renderPredictionHistory() {
   historyList.innerHTML = "";
 
   for (const prediction of store.predictions) {
+    // Each item can be clicked to restore the full result state.
     const item = document.createElement("div");
     item.style.cursor = "pointer";
 
@@ -323,6 +340,7 @@ export function renderPredictionHistory() {
 }
 
 export function clearPredictionResults() {
+  // Remove all saved results and reset the prediction-related UI.
   store.clearPredictions();
 
   renderModelDetails(null);
@@ -336,6 +354,7 @@ export function clearPredictionResults() {
 }
 
 export function renderError(message) {
+  // Show API or validation errors in the current prediction panel.
   renderModelDetails(null);
   document.getElementById("resultLabel").textContent = `Error: ${message}`;
   document.getElementById("resultConfidence").textContent = "-";
@@ -345,6 +364,7 @@ export function renderError(message) {
 }
 
 export function restorePrediction(predictionId) {
+  // Rehydrate the current prediction panel, map, and feedback from history.
   const prediction = store.predictions.find(
     (p) => p.id === predictionId
   );
@@ -353,7 +373,6 @@ export function restorePrediction(predictionId) {
 
   store.currentPredictionId = predictionId;
 
-  // Restore result UI
   renderPrediction({
     model_id: prediction.modelId,
     model_name: prediction.modelName,
@@ -365,7 +384,6 @@ export function restorePrediction(predictionId) {
     correctedLabel: prediction.correctedLabel,
   });
 
-  // Restore map
   clearMapHighlight();
   if (prediction.modelId && prediction.predictedLabel) {
     updateMap(prediction.modelId, prediction.predictedLabel);

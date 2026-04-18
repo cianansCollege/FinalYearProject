@@ -1,3 +1,9 @@
+"""Wraps the deployed Ulster-versus-rest wav2vec model for the live API.
+
+This plugin uses the shared wav2vec embedding pipeline, then applies the saved
+random forest classifier to produce a binary region prediction for the frontend.
+"""
+
 from pathlib import Path
 
 import joblib
@@ -16,6 +22,7 @@ class Wav2VecUlsterVsRestRF(ModelPlugin):
     description = "Detects whether the speaker is from Ulster."
 
     def __init__(self):
+        # Load the trained classifier artefacts once when the backend starts.
         self.model = joblib.load(
             ARTIFACTS_DIR / "wav2vec_ulster_vs_rest_rf_model.joblib"
         )
@@ -24,11 +31,13 @@ class Wav2VecUlsterVsRestRF(ModelPlugin):
         )
 
     def predict(self, audio_bytes: bytes):
+        # Decode and embed the clip before handing it to the classifier.
         embedding = audio_bytes_to_embedding(audio_bytes)
 
         probs = self.model.predict_proba([embedding])[0]
         pred_idx = int(np.argmax(probs))
         label = self.label_encoder.inverse_transform([pred_idx])[0]
+        # Rebuild labels from the encoder so the response stays model-driven.
         probs_list = [
             {
                 "label": str(self.label_encoder.inverse_transform([i])[0]),

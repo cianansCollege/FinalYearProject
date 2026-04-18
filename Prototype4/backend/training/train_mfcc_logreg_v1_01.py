@@ -1,3 +1,11 @@
+"""Trains the MFCC-based classifier used by the live backend plugin.
+
+This script belongs to the offline training pipeline rather than the running
+application. It reads the prepared metadata CSV, extracts MFCC features from
+each clip, evaluates the model with grouped cross-validation, and saves the
+artefacts loaded by `backend/plugins/mfcc_logreg_v1_01.py`.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -20,6 +28,7 @@ CSV_PATH = BACKEND_DIR / "training" / "training_minimal_clean_01.csv"
 
 
 def extract_mfcc_summary_features(file_path: str, n_mfcc: int = 13) -> np.ndarray:
+    # Mirror the runtime MFCC feature shape so training and inference stay aligned.
     waveform, sr = librosa.load(file_path, sr=16000, mono=True)
 
     mfcc = librosa.feature.mfcc(y=waveform, sr=sr, n_mfcc=n_mfcc)
@@ -30,6 +39,7 @@ def extract_mfcc_summary_features(file_path: str, n_mfcc: int = 13) -> np.ndarra
 
 
 def main() -> None:
+    # Read the reduced training metadata generated for this experiment.
     df = pd.read_csv(CSV_PATH)
 
     # Expected columns:
@@ -39,6 +49,7 @@ def main() -> None:
     if missing_cols:
         raise ValueError(f"CSV is missing required columns: {missing_cols}")
 
+    # Accumulate features, labels, and speaker groups for grouped validation.
     X = []
     y = []
     groups = []
@@ -59,6 +70,7 @@ def main() -> None:
     y = np.array(y)
     groups = np.array(groups, dtype=object)
 
+    # Encode province labels into integer classes for scikit-learn.
     label_encoder = LabelEncoder()
     y_encoded = label_encoder.fit_transform(y).astype(np.int64)
 
@@ -72,6 +84,7 @@ def main() -> None:
             f"min_class_count={min_class_count}, unique_speakers={n_unique_speakers}"
         )
 
+    # Keep speakers separated across folds to reduce speaker leakage.
     cv = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=42)
     fold_scores: list[float] = []
 
@@ -91,6 +104,7 @@ def main() -> None:
             f"acc={fold_acc:.4f}"
         )
 
+    # Refit on the full dataset before exporting the deployable artefacts.
     model = Pipeline([
         ("scaler", StandardScaler()),
         ("clf", LogisticRegression(max_iter=5000)),

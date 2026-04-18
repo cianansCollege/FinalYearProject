@@ -1,3 +1,9 @@
+"""Wraps the deployed Leinster-versus-rest wav2vec model for API use.
+
+This plugin shares the same embedding stage as the other wav2vec variants, but
+applies a binary logistic regression classifier trained for Leinster detection.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -17,6 +23,7 @@ class Wav2VecLeinsterVsRestLogReg(ModelPlugin):
     description = "Binary accent classifier for Leinster versus the rest of Ireland."
 
     def __init__(self) -> None:
+        # Load the saved model and label encoder used during live predictions.
         self.model = joblib.load(
             ARTIFACTS_DIR / "wav2vec_leinster_vs_rest_logreg_model.joblib"
         )
@@ -25,12 +32,14 @@ class Wav2VecLeinsterVsRestLogReg(ModelPlugin):
         )
 
     def predict(self, audio_bytes: bytes) -> dict:
+        # Turn the uploaded clip into the embedding expected by the classifier.
         embedding = audio_bytes_to_embedding(audio_bytes)
 
         probs = self.model.predict_proba([embedding])[0]
         pred_idx = int(np.argmax(probs))
         label = self.label_encoder.inverse_transform([pred_idx])[0]
 
+        # Keep the output shape consistent with the other plugins.
         probs_list = [
             {
                 "label": str(self.label_encoder.inverse_transform([i])[0]),

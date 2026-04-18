@@ -1,1 +1,1 @@
-"""Plugin package."""
+"""Collects the backend model plugin implementations."""
