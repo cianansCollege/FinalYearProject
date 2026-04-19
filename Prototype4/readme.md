@@ -6,7 +6,7 @@ It currently includes:
 - A FastAPI backend with plugin-based model loading
 - A browser frontend for recording or uploading audio and viewing results
 - Province map highlighting, prediction history, and feedback capture
-- Multiple inference plugins, including MFCC-based province classification and a wav2vec-based Ulster detector
+- Multiple inference plugins, including MFCC-based province classification and several wav2vec-based classifiers
 
 ## Project Structure
 
@@ -16,10 +16,15 @@ Prototype4/
     app.py                   # FastAPI app + routes
     plugin_loader.py         # Registers model plugins
     registry.py              # In-memory model registry
+    schemas.py               # Shared request/response schema helpers
     plugins/
+      base.py                # Shared plugin interface
       dummy_model.py         # Deterministic test model
       mfcc_logreg_v1_01.py   # MFCC + Logistic Regression model plugin
       wav2vec_ulster_vs_rest_rf.py  # Wav2Vec + Random Forest plugin
+      wav2vec_leinster_vs_rest_logreg.py
+      wav2vec_ulster_leinster_rest_logreg.py
+      wav2vec_province_4way_logreg.py
     services/
       audio.py               # Audio decode/normalize/resample helpers
       features.py            # MFCC feature extraction
@@ -141,6 +146,21 @@ Example response:
       "id": "wav2vec_ulster_vs_rest_rf",
       "name": "Ulster Detection (Wav2Vec)",
       "description": "Detects whether the speaker is from Ulster."
+    },
+    {
+      "id": "wav2vec_leinster_vs_rest_logreg",
+      "name": "Leinster vs Rest - Wav2Vec + Logistic Regression",
+      "description": "Binary accent classifier for Leinster versus the rest of Ireland."
+    },
+    {
+      "id": "wav2vec_ulster_leinster_rest_logreg",
+      "name": "Ulster / Leinster / Rest - Wav2Vec + Logistic Regression",
+      "description": "Three-class accent classifier for Ulster, Leinster, and Rest."
+    },
+    {
+      "id": "wav2vec_province_4way_logreg",
+      "name": "Four Provinces - Wav2Vec + Logistic Regression",
+      "description": "Four-class accent classifier for Connacht, Leinster, Munster, and Ulster."
     }
   ]
 }
@@ -171,13 +191,18 @@ Example response:
 ## Model Plugin System
 
 Plugins implement the `ModelPlugin` interface in `backend/plugins/base.py`.
-Registration happens in `backend/plugin_loader.py`, and runtime lookup happens through `backend/registry.py`.
+The backend startup path explicitly imports and registers the deployed plugins in
+`backend/plugin_loader.py`, and runtime lookup happens through
+`backend/registry.py`.
 
 Current plugins:
 
 - `dummy_v1`: deterministic output based on audio byte length for integration testing
 - `mfcc_logreg_v1_01`: four-way province classification using MFCC summary features + logistic regression
 - `wav2vec_ulster_vs_rest_rf`: binary Ulster-vs-rest classification using Wav2Vec2 embeddings + random forest
+- `wav2vec_leinster_vs_rest_logreg`: binary Leinster-vs-rest classification using Wav2Vec2 embeddings + logistic regression
+- `wav2vec_ulster_leinster_rest_logreg`: three-class Ulster / Leinster / Rest classification using Wav2Vec2 embeddings + logistic regression
+- `wav2vec_province_4way_logreg`: four-way province classification using Wav2Vec2 embeddings + logistic regression
 
 ## Data + State Notes
 
