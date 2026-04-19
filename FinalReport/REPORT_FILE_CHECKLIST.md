@@ -14,6 +14,8 @@ It is intentionally selective: it focuses on implementation, evaluation, testing
 
 - `FinalReport/Diagrams/SystemFlow.pptx`
   Source file for the system architecture / flow diagram.
+- `FinalReport/Diagrams/PhysicalArchitecture.md`
+  Mermaid source for the deployed physical architecture diagram.
 - `FinalReport/Diagrams/FinalReportGanttChart.png`
   Gantt chart image for project planning/timeline sections.
 - `FinalReport/Diagrams/FinalReportGanttChart.gantt`
